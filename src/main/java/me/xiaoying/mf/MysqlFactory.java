@@ -15,7 +15,6 @@ public class MysqlFactory {
     private List<String> inserts = new ArrayList<>();
     private final Map<String, List<Conditions>> conditions = new HashMap<>();
     private final Map<String, String> sets = new HashMap<>();
-    private final List<String> getCols = new ArrayList<>();
 
     /**
      * 构建 MysqlFactory
@@ -79,28 +78,6 @@ public class MysqlFactory {
             return this;
 
         this.tables.remove(table);
-        return this;
-    }
-
-    /**
-     * 获取列数据
-     *
-     * @param colum 列
-     * @return 新的Factory
-     */
-    public MysqlFactory getColum(String colum) {
-        this.getCols.add(colum);
-        return this;
-    }
-
-    /**
-     * 移除获取列数据
-     *
-     * @param colum 列
-     * @return 新的Factory
-     */
-    public MysqlFactory removeGetColum(String colum) {
-        this.getCols.remove(colum);
         return this;
     }
 
@@ -180,7 +157,6 @@ public class MysqlFactory {
         this.tables.clear();
         this.conditions.clear();
         this.sets.clear();
-        this.getCols.clear();
         this.inserts.clear();
         return this;
     }
@@ -526,7 +502,7 @@ public class MysqlFactory {
             else
                 stringBuilder.append(", `").append(this.tables.get(i)).append("`");
         }
-        stringBuilder.append(" VALUES (");
+        stringBuilder.append(" VALUE (");
 
         String s = null;
         for (String insert : this.inserts) {
@@ -547,7 +523,7 @@ public class MysqlFactory {
      * 关闭链接
      *
      * @param conn Connection
-     * @param stmt PreparedStatemente
+     * @param stmt PreparedStatement
      * @param rs ResultSet
      * @throws SQLException 异常
      */
