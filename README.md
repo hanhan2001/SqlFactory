@@ -109,7 +109,7 @@ set sql statements get cols
 
 #### Bugs
 
-If unset sql statements source col and use method `factory.run()`. that will return null.
+If not set sql statements source col and use method `factory.run()`. that will return null.
 
 Because `factory.run()` code is:
 
@@ -172,4 +172,66 @@ After: "SELECT * FROM table"
 
 ### insert
 
+#### Example
+
+run code -> `factory.insert("ad", "db", "bb")`
+
+```yaml
+Before: "INSERT INTO table VALUE()"
+After: "INSERT INTO table VALUE('ad', 'db', 'bb')"
+```
+
+run code -> `factory.removeInsert("ad")`
+
+```yaml
+Before: "INSERT INTO table VALUE('ad', 'db', 'bb')"
+After: "INSERT INTO table VALUE('db', 'bb')"
+```
+
+#### Description
+
+| Name         | Description                      |
+| ------------ | -------------------------------- |
+| insert       | set sql statement insert value   |
+| removeInsert | unset sql statement insert value |
+
 ### set
+
+#### Example
+
+run code -> `factory.set("col1", "value")`
+
+```yaml
+Before: "UPDATE table SET"
+After: "UPDATE table SET `col1` = 'value'"
+```
+
+run code -> factory.removeSet("col1")
+
+```yaml
+Before: "UPDATE table SET `col1` = 'value'"
+After: "UPDATE table SET"
+```
+
+#### Description
+
+| Name      | Description             |
+| --------- | ----------------------- |
+| set       | set sql statement set   |
+| removeSet | unset sql statement set |
+
+## Other Method
+
+### getSql
+
+get factory sql statement, you can get this sql statement and do yourself sql method
+
+#### Example
+
+run code -> `factory.type(SqlType.SELECT).table("table").cols("c1", "c2").condition("c1", "value")`
+
+return -> `SELECT c1, c2 FROM table WHERE c1 = 'value'`
+
+### clear
+
+clear all set
