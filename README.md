@@ -43,9 +43,9 @@ After: "SELECT * FROM `table1`, `table2`"
 
 #### Description
 
-| Name  | Description                   |
-| ----- | ----------------------------- |
-| table | set sql statement from tables |
+| Name  | Description                          |
+| ----- | ------------------------------------ |
+| table | set sql statement data source tables |
 
 ### condition
 
@@ -89,14 +89,14 @@ Before: "SELECT * FROM table WHERE `k` = 'dd' AND `k` = 'v'"
 After: "SELECT * FROM table WHERE `k` = 'dd'"
 ```
 
-run code -> `factory.remoceCondition("k", "v", "OR")`
+run code -> `factory.removeCondition("k", "v", "OR")`
 
 ```yaml
 Before: "SELECT * FROM table WHERE `k` = 'dd' AND `k` = 'v' OR `k` = 'v'"
 After: "SELECT * FROM table WHERE `k` = 'dd' AND `k` = 'v'"
 ```
 
-### Desription
+#### Desription
 
 | Name            | Description                    |
 | --------------- | ------------------------------ |
@@ -105,9 +105,71 @@ After: "SELECT * FROM table WHERE `k` = 'dd' AND `k` = 'v'"
 
 ### cols
 
-| Name      | Description             | Example                                                      |
-| --------- | ----------------------- | ------------------------------------------------------------ |
-| condition | sql statement condtions | new MysqlFactory(mysql set).condition(key, value);<br /><br />new MysqlFactory(mysql set).condition("name", "testName"); -> return List |
-|           |                         |                                                              |
-|           |                         |                                                              |
+set sql statements get cols
 
+#### Bugs
+
+If unset sql statements source col and use method `factory.run()`. that will return null.
+
+Because `factory.run()` code is:
+
+```java
+// head
+private List<String> cols = new ArrayList<>();
+
+// run() method some code
+ResultSet rs = stmt.executeQuery();
+HashMap<String, List<Object>> map = new HashMap<>();
+List<Object> list;
+while (rs.next()) {
+	for (String s : this.cols) {
+    	if (map.get(s) == null)
+    		list = new ArrayList<>();
+    	else
+        	list = map.get(s);
+
+        list.add(rs.getObject(s));
+        map.put(s, list);
+	}
+}
+// closed connection
+return map;
+```
+
+while rs loop, cols list is null. So, that will return null.
+
+I think it will be fixed in version 0.0.2.
+
+#### Example
+
+run code -> `factory.cols("c1")`
+
+```yaml
+Before: "SELECT * FROM table"
+After: "SELECT `c1` FROM table"
+```
+
+run code -> `factory.cols("c1", "c2")`
+
+```yaml
+Before: "SELECT * FROM table"
+After: "SELECT `c1`, `c2` FROM table"
+```
+
+run code -> `factory.removeCols("c1")`
+
+```yaml
+Before: "SELECT `c1` FROM table"
+After: "SELECT * FROM table"
+```
+
+#### Description
+
+| Name       | Description                          |
+| ---------- | ------------------------------------ |
+| cols       | set sql statement data source cols   |
+| removeCols | unset sql statement data source cols |
+
+### insert
+
+### set
