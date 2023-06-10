@@ -454,7 +454,7 @@ public class MysqlFactory {
                 stringBuilder.append("(").append(length).append(")");
         }
 
-        stringBuilder.append(");");
+        stringBuilder.append(")");
         return stringBuilder.toString();
     }
 
