@@ -15,6 +15,7 @@ public class MysqlFactory {
     private List<String> inserts = new ArrayList<>();
     private final Map<String, List<Conditions>> conditions = new HashMap<>();
     private final Map<String, String> sets = new HashMap<>();
+    private final Map<String, Map<String, Integer>> create = new HashMap<>();
 
     /**
      * 构建 MysqlFactory
@@ -111,13 +112,6 @@ public class MysqlFactory {
      */
     public Map<String, List<Object>> run() {
         Connection conn = this.getConnection();
-        if (type == null) {
-            try {
-                throw new Exception("Unset sql type, need to code factory.type(SqlType)");
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
 
         try {
             PreparedStatement stmt = conn.prepareStatement(this.getSql());
@@ -158,6 +152,32 @@ public class MysqlFactory {
         this.conditions.clear();
         this.sets.clear();
         this.inserts.clear();
+        this.create.clear();
+        return this;
+    }
+
+    /**
+     * 创建字段
+     *
+     * @param key 字段名
+     * @param type 字段类型
+     * @param length 字段长度
+     * @return 新的Factory
+     */
+    public MysqlFactory create(String key, String type, int length) {
+        Map<String, Integer> map = new HashMap<>();
+        map.put(type, length);
+        this.create.put(key, map);
+        return this;
+    }
+    /**
+     * 创建字段
+     *
+     * @param key 字段名
+     * @return 新的Factory
+     */
+    public MysqlFactory removeCreate(String key) {
+        this.create.remove(key);
         return this;
     }
 
@@ -336,6 +356,14 @@ public class MysqlFactory {
      * @return String
      */
     public String getSql() {
+        if (this.type == null) {
+            try {
+                throw new Exception("Unset sql type, need to code factory.type(SqlType)");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (this.type == SqlType.SELECT) {
             return this.selectSql();
         } else if (this.type == SqlType.UPDATE) {
@@ -344,6 +372,8 @@ public class MysqlFactory {
             return this.deleteSql();
         } else if (this.type == SqlType.INSERT) {
             return this.insertSql();
+        } else if (this.type == SqlType.CREATE) {
+            return this.createSql();
         }
         return null;
     }
@@ -397,10 +427,34 @@ public class MysqlFactory {
      */
     private String createSql() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("CREATE TABLE");
+        stringBuilder.append("CREATE TABLE if NOT EXISTS ");
 
+        for (int i = 0; i < this.tables.size(); i++) {
+            if (i == 0)
+                stringBuilder.append("`").append(this.tables.get(i)).append("`");
+            else
+                stringBuilder.append(", `").append(this.tables.get(i)).append("`");
+        }
+        stringBuilder.append(" (");
+        String key = null;
+        for (String s : this.create.keySet()) {
+            if (key != null)
+                stringBuilder.append(", ");
 
+            key = s;
+            stringBuilder.append("`").append(s).append("`");
+            int length = 0;
+            String type = null;
+            for (String s1 : this.create.get(s).keySet()) {
+                length = this.create.get(s).get(s1);
+                type = s1;
+            }
+            stringBuilder.append(" ").append(type);
+            if (length != 0)
+                stringBuilder.append("(").append(length).append(")");
+        }
 
+        stringBuilder.append(");");
         return stringBuilder.toString();
     }
 
