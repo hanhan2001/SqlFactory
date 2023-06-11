@@ -2,6 +2,7 @@ package me.xiaoying.mf;
 
 import me.xiaoying.mf.entity.Condition;
 import me.xiaoying.mf.entity.Create;
+import me.xiaoying.mf.entity.Set;
 
 import java.sql.*;
 import java.util.*;
@@ -17,8 +18,7 @@ public class MysqlFactory {
     private final Stack<String> tables = new Stack<>();
     private final Stack<String> inserts = new Stack<>();
     private final Stack<Condition> conditions = new Stack<>();
-    private final Map<String, String> sets = new HashMap<>();
-//    private final Map<String, Map<String, Integer>> create = new HashMap<>();
+    private final Stack<Set> sets = new Stack<>();
     private final Stack<Create> create = new Stack<>();
 
     /**
@@ -178,7 +178,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory removeCreate(String key) {
-        this.create.remove(key);
+        this.create.removeIf(create -> create.getName().equalsIgnoreCase(key));
         return this;
     }
 
@@ -287,7 +287,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory set(String key, String value) {
-        sets.put(key, value);
+        sets.add(new Set(key, value));
         return this;
     }
 
@@ -299,7 +299,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory removeSet(String key) {
-        sets.remove(key);
+        this.sets.removeIf(set -> set.getKey().equalsIgnoreCase(key));
         return this;
     }
 
@@ -391,18 +391,6 @@ public class MysqlFactory {
                 stringBuilder.append(", `").append(this.tables.get(i)).append("`");
         }
 
-        stringBuilder.append(" SET ");
-        String set = null;
-        for (String s : this.sets.keySet()) {
-            if (set == null) {
-                set = s;
-                stringBuilder.append("`").append(s).append("` = '").append(this.sets.get(s)).append("'");
-                continue;
-            }
-
-            stringBuilder.append(", `").append(s).append("` = '").append(this.sets.get(s)).append("'");
-        }
-
         stringBuilder.append(this.conditionMontage()).append(";");
         return stringBuilder.toString();
     }
@@ -479,6 +467,9 @@ public class MysqlFactory {
     private String conditionMontage() {
         StringBuilder stringBuilder = new StringBuilder();
 
+        if (this.conditions.size() == 0)
+            return null;
+
         Condition condition = null;
         int conditionTime = 0;
         for (Condition condition1 : this.conditions) {
@@ -504,6 +495,9 @@ public class MysqlFactory {
     private String createMontage() {
         StringBuilder stringBuilder = new StringBuilder();
 
+        if (this.create.size() == 0)
+            return null;
+
         String key = null;
         for (Create create1 : this.create) {
             if (key != null)
@@ -518,6 +512,26 @@ public class MysqlFactory {
             stringBuilder.append(" ").append(type);
             if (length != 0)
                 stringBuilder.append("(").append(length).append(")");
+        }
+        return stringBuilder.toString();
+    }
+
+    private String setMontage() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if (this.sets.size() == 0)
+            return null;
+
+        Set set = null;
+        for (Set set1 : this.sets) {
+            if (set == null) {
+                set = set1;
+                stringBuilder.append(" SET ");
+                stringBuilder.append("`").append(set1.getKey()).append("` = '").append(set1.getValue()).append("'");
+                continue;
+            }
+
+            stringBuilder.append(", `").append(set1.getKey()).append("` = '").append(set1.getValue()).append("'");
         }
         return stringBuilder.toString();
     }
