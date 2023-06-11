@@ -1,6 +1,7 @@
 package me.xiaoying.mf;
 
 import me.xiaoying.mf.entity.Condition;
+import me.xiaoying.mf.entity.Create;
 
 import java.sql.*;
 import java.util.*;
@@ -17,7 +18,8 @@ public class MysqlFactory {
     private final Stack<String> inserts = new Stack<>();
     private final Stack<Condition> conditions = new Stack<>();
     private final Map<String, String> sets = new HashMap<>();
-    private final Map<String, Map<String, Integer>> create = new HashMap<>();
+//    private final Map<String, Map<String, Integer>> create = new HashMap<>();
+    private final Stack<Create> create = new Stack<>();
 
     /**
      * 构建 MysqlFactory
@@ -166,9 +168,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory create(String key, String type, int length) {
-        Map<String, Integer> map = new HashMap<>();
-        map.put(type, length);
-        this.create.put(key, map);
+        this.create.add(new Create(key, type, length));
         return this;
     }
     /**
@@ -372,26 +372,7 @@ public class MysqlFactory {
             else
                 stringBuilder.append(", `").append(this.tables.get(i)).append("`");
         }
-        stringBuilder.append(" (");
-        String key = null;
-        for (String s : this.create.keySet()) {
-            if (key != null)
-                stringBuilder.append(", ");
-
-            key = s;
-            stringBuilder.append("`").append(s).append("`");
-            int length = 0;
-            String type = null;
-            for (String s1 : this.create.get(s).keySet()) {
-                length = this.create.get(s).get(s1);
-                type = s1;
-            }
-            stringBuilder.append(" ").append(type);
-            if (length != 0)
-                stringBuilder.append("(").append(length).append(")");
-        }
-
-        stringBuilder.append(");");
+        stringBuilder.append(" (").append(this.createMontage()).append(");");
         return stringBuilder.toString();
     }
 
@@ -490,6 +471,11 @@ public class MysqlFactory {
         if (conn != null) conn.close();
     }
 
+    /**
+     * 拼接 condition
+     *
+     * @return String
+     */
     private String conditionMontage() {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -506,6 +492,32 @@ public class MysqlFactory {
 
             stringBuilder.append("`").append(condition1.getKey()).append("` = ").append("'").append(condition1.getString()).append("'");
             conditionTime = 1;
+        }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * 拼接 create
+     *
+     * @return String
+     */
+    private String createMontage() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        String key = null;
+        for (Create create1 : this.create) {
+            if (key != null)
+                stringBuilder.append(", ");
+
+            key = create1.getName();
+            stringBuilder.append("`").append(create1.getName()).append("`");
+
+            String type = create1.getType();
+            int length = create1.getLength();
+
+            stringBuilder.append(" ").append(type);
+            if (length != 0)
+                stringBuilder.append("(").append(length).append(")");
         }
         return stringBuilder.toString();
     }
