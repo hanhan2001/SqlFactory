@@ -366,6 +366,9 @@ public class MysqlFactory {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("CREATE TABLE if NOT EXISTS ");
 
+        if (this.tables.size() == 0)
+            stringBuilder.append("*");
+
         for (int i = 0; i < this.tables.size(); i++) {
             if (i == 0)
                 stringBuilder.append("`").append(this.tables.get(i)).append("`");
