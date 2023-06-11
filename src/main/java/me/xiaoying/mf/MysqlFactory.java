@@ -1,5 +1,7 @@
 package me.xiaoying.mf;
 
+import me.xiaoying.mf.entity.Condition;
+
 import java.sql.*;
 import java.util.*;
 
@@ -10,10 +12,10 @@ public class MysqlFactory {
     private final String user;
     private final String pass;
     private SqlType type;
-    private List<String> cols = new ArrayList<>();
-    private List<String> tables = new ArrayList<>();
-    private List<String> inserts = new ArrayList<>();
-    private final Map<String, List<Conditions>> conditions = new HashMap<>();
+    private final Stack<String> cols = new Stack<>();
+    private final Stack<String> tables = new Stack<>();
+    private final Stack<String> inserts = new Stack<>();
+    private final Stack<Condition> conditions = new Stack<>();
     private final Map<String, String> sets = new HashMap<>();
     private final Map<String, Map<String, Integer>> create = new HashMap<>();
 
@@ -38,7 +40,6 @@ public class MysqlFactory {
      * 链接 Mysql
      *
      * @return Connection
-     * @throws SQLException 异常
      */
     public Connection getConnection() {
         try {
@@ -64,7 +65,7 @@ public class MysqlFactory {
      * @param tables 表
      */
     public MysqlFactory table(String... tables) {
-        this.tables = new ArrayList<>(Arrays.asList(tables));
+        this.tables.addAll(Arrays.asList(tables));
         return this;
     }
 
@@ -89,7 +90,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory cols(String... col) {
-        this.cols = new ArrayList<>(Arrays.asList(col));
+        this.cols.addAll(Arrays.asList(col));
         return this;
     }
 
@@ -189,14 +190,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory condition(String key, String value) {
-        List<Conditions> values;
-        if (this.conditions.get(key) == null)
-            values = new ArrayList<>();
-        else
-            values = conditions.get(key);
-
-        values.add(new Conditions(value, "AND"));
-        this.conditions.put(key, values);
+        this.conditions.add(new Condition(key, value, "AND"));
         return this;
     }
 
@@ -215,12 +209,6 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory condition(String key, String value, String type) {
-        List<Conditions> values;
-        if (this.conditions.get(key) == null)
-            values = new ArrayList<>();
-        else
-            values = conditions.get(key);
-
         if (!type.equalsIgnoreCase("OR") && !type.equalsIgnoreCase("AND")) {
             try {
                 throw new Exception("Unknown type, you can set 'OR' or 'AND'");
@@ -229,8 +217,7 @@ public class MysqlFactory {
             }
         }
 
-        values.add(new Conditions(value, type));
-        this.conditions.put(key, values);
+        this.conditions.add(new Condition(key, value, type));
         return this;
     }
 
@@ -241,10 +228,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory removeCondition(String key) {
-        if (this.conditions.get(key) == null) 
-            return this;
-
-        this.conditions.remove(key);
+        this.conditions.removeIf(condition -> condition.getKey().equalsIgnoreCase(key));
         return this;
     }
 
@@ -256,21 +240,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory removeCondition(String key, String value) {
-        if (this.conditions.get(key) == null)
-            return this;
-
-        Conditions conditions = null;
-        for (Conditions conditions1 : this.conditions.get(key)) {
-            if (!conditions1.getString().equalsIgnoreCase(value))
-                continue;
-
-            conditions = conditions1;
-        }
-
-        if (conditions == null)
-            return this;
-
-        this.conditions.get(key).remove(conditions);
+        this.conditions.removeIf(condition -> condition.getKey().equalsIgnoreCase(value) && condition.getString().equalsIgnoreCase(value));
         return this;
     }
 
@@ -283,24 +253,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory removeCondition(String key, String value, String type) {
-        if (this.conditions.get(key) == null)
-            return this;
-
-        Conditions conditions = null;
-        for (Conditions conditions1 : this.conditions.get(key)) {
-            if (!conditions1.getString().equalsIgnoreCase(value))
-                continue;
-
-            if (!conditions1.getType().equalsIgnoreCase(type))
-                continue;
-
-            conditions = conditions1;
-        }
-
-        if (conditions == null)
-            return this;
-
-        this.conditions.get(key).remove(conditions);
+        this.conditions.removeIf(condition -> condition.getKey().equalsIgnoreCase(value) && condition.getString().equalsIgnoreCase(value) && condition.getType().equalsIgnoreCase(type));
         return this;
     }
 
@@ -311,7 +264,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory insert(String... key) {
-        this.inserts = new ArrayList<>(Arrays.asList(key));
+        this.inserts.addAll(Arrays.asList(key));
         return this;
     }
 
@@ -364,16 +317,17 @@ public class MysqlFactory {
             }
         }
 
-        if (this.type == SqlType.SELECT) {
-            return this.selectSql();
-        } else if (this.type == SqlType.UPDATE) {
-            return this.updateSql();
-        } else if(this.type == SqlType.DELETE) {
-            return this.deleteSql();
-        } else if (this.type == SqlType.INSERT) {
-            return this.insertSql();
-        } else if (this.type == SqlType.CREATE) {
-            return this.createSql();
+        switch (this.type) {
+            case SELECT:
+                return this.selectSql();
+            case UPDATE:
+                return this.updateSql();
+            case DELETE:
+                return this.deleteSql();
+            case INSERT:
+                return this.insertSql();
+            case CREATE:
+                return this.createSql();
         }
         return null;
     }
@@ -399,24 +353,7 @@ public class MysqlFactory {
             else
                 stringBuilder.append(", `").append(this.tables.get(i)).append("`");
         }
-        String condition = null;
-        int conditionTime = 0;
-        for (String s : this.conditions.keySet()) {
-            List<Conditions> list = this.conditions.get(s);
-            if (condition == null) {
-                condition = s;
-                stringBuilder.append(" WHERE ");
-            }
-
-            for (int i = 0; i < list.size(); i++) {
-                if (i != 0 || conditionTime != 0)
-                    stringBuilder.append(" ").append(list.get(i).getType()).append(" ");
-
-                stringBuilder.append("`").append(s).append("` = ").append("'").append(list.get(i).getString()).append("'");
-                conditionTime = 1;
-            }
-        }
-        stringBuilder.append(";");
+        stringBuilder.append(this.conditionMontage()).append(";");
         return stringBuilder.toString();
     }
 
@@ -485,24 +422,7 @@ public class MysqlFactory {
             stringBuilder.append(", `").append(s).append("` = '").append(this.sets.get(s)).append("'");
         }
 
-        String condition = null;
-        int conditionTime = 0;
-        for (String s : this.conditions.keySet()) {
-            List<Conditions> list = this.conditions.get(s);
-            if (condition == null) {
-                condition = s;
-                stringBuilder.append(" WHERE ");
-            }
-
-            for (int i = 0; i < list.size(); i++) {
-                if (i != 0 || conditionTime != 0)
-                    stringBuilder.append(" ").append(list.get(i).getType()).append(" ");
-
-                stringBuilder.append("`").append(s).append("` = ").append("'").append(list.get(i).getString()).append("'");
-                conditionTime = 1;
-            }
-        }
-        stringBuilder.append(";");
+        stringBuilder.append(this.conditionMontage()).append(";");
         return stringBuilder.toString();
     }
 
@@ -521,23 +441,6 @@ public class MysqlFactory {
                 stringBuilder.append(", `").append(this.tables.get(i)).append("`");
         }
 
-        String condition = null;
-        int conditionTime = 0;
-        for (String s : this.conditions.keySet()) {
-            List<Conditions> list = this.conditions.get(s);
-            if (condition == null) {
-                condition = s;
-                stringBuilder.append(" WHERE ");
-            }
-
-            for (int i = 0; i < list.size(); i++) {
-                if (i != 0 || conditionTime != 0)
-                    stringBuilder.append(" ").append(list.get(i).getType()).append(" ");
-
-                stringBuilder.append("`").append(s).append("` = ").append("'").append(list.get(i).getString()).append("'");
-                conditionTime = 1;
-            }
-        }
         stringBuilder.append(";");
         return stringBuilder.toString();
     }
@@ -586,22 +489,24 @@ public class MysqlFactory {
         if (stmt != null) stmt.close();
         if (conn != null) conn.close();
     }
-}
 
-class Conditions {
-    String string;
-    String type;
+    private String conditionMontage() {
+        StringBuilder stringBuilder = new StringBuilder();
 
-    public Conditions(String string, String type) {
-        this.string = string;
-        this.type = type;
-    }
+        Condition condition = null;
+        int conditionTime = 0;
+        for (Condition condition1 : this.conditions) {
+            if (condition == null) {
+                condition = condition1;
+                stringBuilder.append(" WHERE ");
+            }
 
-    public String getString() {
-        return this.string;
-    }
+            if (conditionTime != 0)
+                stringBuilder.append(" ").append(condition1.getType()).append(" ");
 
-    public String getType() {
-        return this.type;
+            stringBuilder.append("`").append(condition1.getKey()).append("` = ").append("'").append(condition1.getString()).append("'");
+            conditionTime = 1;
+        }
+        return stringBuilder.toString();
     }
 }
