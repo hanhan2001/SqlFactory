@@ -20,6 +20,7 @@ public class MysqlFactory {
     private final Stack<Condition> conditions = new Stack<>();
     private final Stack<Set> sets = new Stack<>();
     private final Stack<Create> create = new Stack<>();
+    private String group;
 
     /**
      * 构建 MysqlFactory
@@ -183,6 +184,27 @@ public class MysqlFactory {
     }
 
     /**
+     * 分组字段
+     *
+     * @param group 分组字段
+     * @return 新的Factory
+     */
+    public MysqlFactory group(String group) {
+        this.group = group;
+        return this;
+    }
+
+    /**
+     * 移除分组字段
+     *
+     * @return 新的Factory
+     */
+    public MysqlFactory removeGroup() {
+        this.group = null;
+        return this;
+    }
+
+    /**
      * 判断条件
      *
      * @param key 对象
@@ -240,7 +262,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory removeCondition(String key, String value) {
-        this.conditions.removeIf(condition -> condition.getKey().equalsIgnoreCase(value) && condition.getString().equalsIgnoreCase(value));
+        this.conditions.removeIf(condition -> condition.getKey().equalsIgnoreCase(key) && condition.getString().equalsIgnoreCase(value));
         return this;
     }
 
@@ -253,7 +275,7 @@ public class MysqlFactory {
      * @return 新的Factory
      */
     public MysqlFactory removeCondition(String key, String value, String type) {
-        this.conditions.removeIf(condition -> condition.getKey().equalsIgnoreCase(value) && condition.getString().equalsIgnoreCase(value) && condition.getType().equalsIgnoreCase(type));
+        this.conditions.removeIf(condition -> condition.getKey().equalsIgnoreCase(key) && condition.getString().equalsIgnoreCase(value) && condition.getType().equalsIgnoreCase(type));
         return this;
     }
 
@@ -340,20 +362,25 @@ public class MysqlFactory {
     private String selectSql() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT ");
-        for (int i = 0; i < this.cols.size(); i++) {
-            if (i == 0)
-                stringBuilder.append("`").append(this.cols.get(i)).append("`");
-            else
-                stringBuilder.append(", `").append(this.cols.get(i)).append("`");
-        }
-        stringBuilder.append(" FROM ");
-        for (int i = 0; i < this.tables.size(); i++) {
-            if (i == 0)
-                stringBuilder.append("`").append(this.tables.get(i)).append("`");
-            else
-                stringBuilder.append(", `").append(this.tables.get(i)).append("`");
-        }
-        stringBuilder.append(this.conditionMontage()).append(";");
+
+        if (this.cols.size() == 0)
+            stringBuilder.append("*");
+        else
+            stringBuilder.append(this.colMontage());
+
+        stringBuilder.append(" FROM ")
+                .append(this.tableMontage());
+
+        if (this.conditions.size() != 0)
+            stringBuilder.append(" WHERE ").append(this.conditionMontage());
+
+        if (this.group != null)
+            stringBuilder
+                    .append(" GROUP BY `")
+                    .append(this.group)
+                    .append("`");
+
+        stringBuilder.append(";");
         return stringBuilder.toString();
     }
 
@@ -363,20 +390,7 @@ public class MysqlFactory {
      * @return String
      */
     private String createSql() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("CREATE TABLE if NOT EXISTS ");
-
-        if (this.tables.size() == 0)
-            stringBuilder.append("*");
-
-        for (int i = 0; i < this.tables.size(); i++) {
-            if (i == 0)
-                stringBuilder.append("`").append(this.tables.get(i)).append("`");
-            else
-                stringBuilder.append(", `").append(this.tables.get(i)).append("`");
-        }
-        stringBuilder.append(" (").append(this.createMontage()).append(");");
-        return stringBuilder.toString();
+        return "CREATE TABLE if NOT EXISTS " + this.tableMontage() + " (" + this.createMontage() + ");";
     }
 
     /**
@@ -385,17 +399,7 @@ public class MysqlFactory {
      * @return String
      */
     private String updateSql() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("UPDATE ");
-        for (int i = 0; i < this.tables.size(); i++) {
-            if (i == 0)
-                stringBuilder.append("`").append(this.tables.get(i)).append("`");
-            else
-                stringBuilder.append(", `").append(this.tables.get(i)).append("`");
-        }
-
-        stringBuilder.append(this.conditionMontage()).append(";");
-        return stringBuilder.toString();
+        return "UPDATE " + this.tableMontage() + " SET " + this.setMontage() + ";";
     }
 
     /**
@@ -405,15 +409,13 @@ public class MysqlFactory {
      */
     private String deleteSql() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("DELETE FROM ");
-        for (int i = 0; i < this.tables.size(); i++) {
-            if (i == 0)
-                stringBuilder.append("`").append(this.tables.get(i)).append("`");
-            else
-                stringBuilder.append(", `").append(this.tables.get(i)).append("`");
-        }
 
-        stringBuilder.append(";");
+        stringBuilder.append("DELETE FROM ")
+                .append(this.tableMontage());
+
+        if (this.conditions.size() != 0)
+            stringBuilder.append(" WHERE ").append(this.conditionMontage());
+
         return stringBuilder.toString();
     }
 
@@ -478,7 +480,6 @@ public class MysqlFactory {
         for (Condition condition1 : this.conditions) {
             if (condition == null) {
                 condition = condition1;
-                stringBuilder.append(" WHERE ");
             }
 
             if (conditionTime != 0)
@@ -519,6 +520,11 @@ public class MysqlFactory {
         return stringBuilder.toString();
     }
 
+    /**
+     * 拼接 set
+     *
+     * @return String
+     */
     private String setMontage() {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -529,13 +535,48 @@ public class MysqlFactory {
         for (Set set1 : this.sets) {
             if (set == null) {
                 set = set1;
-                stringBuilder.append(" SET ");
                 stringBuilder.append("`").append(set1.getKey()).append("` = '").append(set1.getValue()).append("'");
                 continue;
             }
 
             stringBuilder.append(", `").append(set1.getKey()).append("` = '").append(set1.getValue()).append("'");
         }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * 拼接 col
+     *
+     * @return String
+     */
+    public String colMontage() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < this.cols.size(); i++) {
+            if (i == 0)
+                stringBuilder.append("`").append(this.cols.get(i)).append("`");
+            else
+                stringBuilder.append(", `").append(this.cols.get(i)).append("`");
+        }
+
+        return stringBuilder.toString();
+    }
+
+    /**
+     * 拼接 table
+     *
+     * @return 新的Factory
+     */
+    public String tableMontage() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < this.tables.size(); i++) {
+            if (i == 0)
+                stringBuilder.append("`").append(this.tables.get(i)).append("`");
+            else
+                stringBuilder.append(", `").append(this.tables.get(i)).append("`");
+        }
+
         return stringBuilder.toString();
     }
 }
