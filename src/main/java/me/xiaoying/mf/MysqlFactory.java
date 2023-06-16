@@ -54,7 +54,7 @@ public class MysqlFactory {
 
     /**
      * 语句类型
-     * 
+     *
      * @param type 类型
      */
     public MysqlFactory type(SqlType type) {
@@ -64,7 +64,7 @@ public class MysqlFactory {
 
     /**
      * 来源表
-     * 
+     *
      * @param tables 表
      */
     public MysqlFactory table(String... tables) {
@@ -245,7 +245,7 @@ public class MysqlFactory {
 
     /**
      * 移除判断条件
-     * 
+     *
      * @param key 对象
      * @return 新的Factory
      */
@@ -327,7 +327,7 @@ public class MysqlFactory {
 
     /**
      * 拼接Sql语句
-     * 
+     *
      * @return String
      */
     public String getSql() {
@@ -376,9 +376,8 @@ public class MysqlFactory {
 
         if (this.group != null)
             stringBuilder
-                    .append(" GROUP BY `")
-                    .append(this.group)
-                    .append("`");
+                    .append(" GROUP BY ")
+                    .append(this.group);
 
         stringBuilder.append(";");
         return stringBuilder.toString();
@@ -386,7 +385,7 @@ public class MysqlFactory {
 
     /**
      * sql语句-create
-     * 
+     *
      * @return String
      */
     private String createSql() {
@@ -429,21 +428,21 @@ public class MysqlFactory {
         stringBuilder.append("INSERT INTO ");
         for (int i = 0; i < this.tables.size(); i++) {
             if (i == 0)
-                stringBuilder.append("`").append(this.tables.get(i)).append("`");
+                stringBuilder.append(this.tables.get(i));
             else
-                stringBuilder.append(", `").append(this.tables.get(i)).append("`");
+                stringBuilder.append(", ").append(this.tables.get(i));
         }
         stringBuilder.append(" VALUE (");
 
         String s = null;
         for (String insert : this.inserts) {
             if (s == null) {
-                stringBuilder.append("`").append(insert).append("`");
+                stringBuilder.append(insert);
                 s = insert;
                 continue;
             }
 
-            stringBuilder.append(", `").append(insert).append("`");
+            stringBuilder.append(", ").append(insert);
         }
 
         stringBuilder.append(");");
@@ -485,7 +484,7 @@ public class MysqlFactory {
             if (conditionTime != 0)
                 stringBuilder.append(" ").append(condition1.getType()).append(" ");
 
-            stringBuilder.append("`").append(condition1.getKey()).append("` = ").append("'").append(condition1.getString()).append("'");
+            stringBuilder.append(condition1.getKey()).append(" = ").append("'").append(condition1.getString()).append("'");
             conditionTime = 1;
         }
         return stringBuilder.toString();
@@ -508,7 +507,7 @@ public class MysqlFactory {
                 stringBuilder.append(", ");
 
             key = create1.getName();
-            stringBuilder.append("`").append(create1.getName()).append("`");
+            stringBuilder.append(create1.getName());
 
             String type = create1.getType();
             int length = create1.getLength();
@@ -535,11 +534,11 @@ public class MysqlFactory {
         for (Set set1 : this.sets) {
             if (set == null) {
                 set = set1;
-                stringBuilder.append("`").append(set1.getKey()).append("` = '").append(set1.getValue()).append("'");
+                stringBuilder.append(set1.getKey()).append(" = '").append(set1.getValue()).append("'");
                 continue;
             }
 
-            stringBuilder.append(", `").append(set1.getKey()).append("` = '").append(set1.getValue()).append("'");
+            stringBuilder.append(", ").append(set1.getKey()).append(" = '").append(set1.getValue()).append("'");
         }
         return stringBuilder.toString();
     }
@@ -554,9 +553,9 @@ public class MysqlFactory {
 
         for (int i = 0; i < this.cols.size(); i++) {
             if (i == 0)
-                stringBuilder.append("`").append(this.cols.get(i)).append("`");
+                stringBuilder.append(this.cols.get(i));
             else
-                stringBuilder.append(", `").append(this.cols.get(i)).append("`");
+                stringBuilder.append(", ").append(this.cols.get(i));
         }
 
         return stringBuilder.toString();
@@ -572,9 +571,9 @@ public class MysqlFactory {
 
         for (int i = 0; i < this.tables.size(); i++) {
             if (i == 0)
-                stringBuilder.append("`").append(this.tables.get(i)).append("`");
+                stringBuilder.append(this.tables.get(i));
             else
-                stringBuilder.append(", `").append(this.tables.get(i)).append("`");
+                stringBuilder.append(", ").append(this.tables.get(i));
         }
 
         return stringBuilder.toString();
