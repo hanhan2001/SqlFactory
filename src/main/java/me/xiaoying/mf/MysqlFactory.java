@@ -398,7 +398,10 @@ public class MysqlFactory {
      * @return String
      */
     private String updateSql() {
-        return "UPDATE " + this.tableMontage() + " SET " + this.setMontage() + ";";
+        if (this.conditions.size() == 0)
+            return "UPDATE " + this.tableMontage() + " SET " + this.setMontage() + ";";
+        else
+            return "UPDATE " + this.tableMontage() + " SET " + this.setMontage() + " WHERE " + this.conditionMontage() + ";";
     }
 
     /**
