@@ -1,4 +1,4 @@
-# MysqlFactory
+# SqlFactory
 
 ## SqlType
 
@@ -7,7 +7,7 @@ Use to set sql statement type.
 ### Example
 
 ```java
-new MysqlFactory(mysql set).type(SqlType.SELECT);
+new SqlFactory(mysql set).type(SqlType.SELECT);
 ```
 
 ### Enum
