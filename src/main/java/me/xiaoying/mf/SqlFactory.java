@@ -1,18 +1,22 @@
 package me.xiaoying.mf;
 
+import com.mysql.cj.jdbc.Driver;
 import me.xiaoying.mf.entity.Condition;
 import me.xiaoying.mf.entity.Create;
 import me.xiaoying.mf.entity.Set;
+import me.xiaoying.mf.exception.UnknownDatabaseType;
+import me.xiaoying.mf.utils.ExceptionUtil;
+import org.sqlite.JDBC;
 
 import java.sql.*;
 import java.util.*;
 
-public class MysqlFactory {
+public class SqlFactory {
     private final String host;
-    private final int port;
-    private final String database;
-    private final String user;
-    private final String pass;
+    private int port;
+    private String database;
+    private String user;
+    private String pass;
     private SqlType type;
     private final Stack<String> cols = new Stack<>();
     private final Stack<String> tables = new Stack<>();
@@ -21,9 +25,10 @@ public class MysqlFactory {
     private final Stack<Set> sets = new Stack<>();
     private final Stack<Create> create = new Stack<>();
     private String group;
+    private String file;
 
     /**
-     * 构建 MysqlFactory
+     * 构建 Mysql
      *
      * @param host 主机地址
      * @param port 端口
@@ -31,12 +36,24 @@ public class MysqlFactory {
      * @param user 用户
      * @param pass 密码
      */
-    public MysqlFactory(String host, int port, String database, String user, String pass) {
+    public SqlFactory(String host, int port, String database, String user, String pass) {
         this.host = host;
         this.port = port;
         this.database = database;
         this.user = user;
         this.pass = pass;
+    }
+
+
+    /**
+     * 构建 Sqlite
+     *
+     * @param host 主机地址
+     * @param file 文件
+     */
+    public SqlFactory(String host, String file) {
+        this.host = host;
+        this.file = file;
     }
 
     /**
@@ -45,11 +62,27 @@ public class MysqlFactory {
      * @return Connection
      */
     public Connection getConnection() {
+        String type;
+
         try {
-            return DriverManager.getConnection(this.host + ":" + this.port + "/" + this.database, this.user, this.pass);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            type = this.host.split(":")[1];
+            switch (type.toUpperCase()) {
+                case "MYSQL": {
+                    DriverManager.registerDriver(new Driver());
+                    return DriverManager.getConnection(this.host + ":" + this.port + "/" + this.database, this.user, this.pass);
+                }
+                case "SQLITE": {
+                    DriverManager.registerDriver(new JDBC());
+                    return DriverManager.getConnection(this.host + ":" + this.file);
+                }
+                default:
+                    ExceptionUtil.throwException(new UnknownDatabaseType("SqlFactory just use to Mysql or Sqlite"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+        return null;
     }
 
     /**
@@ -57,7 +90,7 @@ public class MysqlFactory {
      *
      * @param type 类型
      */
-    public MysqlFactory type(SqlType type) {
+    public SqlFactory type(SqlType type) {
         this.type = type;
         return this;
     }
@@ -67,7 +100,7 @@ public class MysqlFactory {
      *
      * @param tables 表
      */
-    public MysqlFactory table(String... tables) {
+    public SqlFactory table(String... tables) {
         this.tables.addAll(Arrays.asList(tables));
         return this;
     }
@@ -78,7 +111,7 @@ public class MysqlFactory {
      * @param table 表名
      * @return 新的Factory
      */
-    public MysqlFactory removeTable(String table) {
+    public SqlFactory removeTable(String table) {
         if (!this.tables.contains(table))
             return this;
 
@@ -92,7 +125,7 @@ public class MysqlFactory {
      * @param col 列
      * @return 新的Factory
      */
-    public MysqlFactory cols(String... col) {
+    public SqlFactory cols(String... col) {
         this.cols.addAll(Arrays.asList(col));
         return this;
     }
@@ -103,7 +136,7 @@ public class MysqlFactory {
      * @param col 列
      * @return 新的Factory
      */
-    public MysqlFactory removeCols(String col) {
+    public SqlFactory removeCols(String col) {
         if (!this.cols.contains(col))
             return this;
 
@@ -149,7 +182,7 @@ public class MysqlFactory {
     /**
      * 清除配置
      */
-    public MysqlFactory clear() {
+    public SqlFactory clear() {
         this.type = null;
         this.cols.clear();
         this.tables.clear();
@@ -168,7 +201,7 @@ public class MysqlFactory {
      * @param length 字段长度
      * @return 新的Factory
      */
-    public MysqlFactory create(String key, String type, int length) {
+    public SqlFactory create(String key, String type, int length) {
         this.create.add(new Create(key, type, length));
         return this;
     }
@@ -178,7 +211,7 @@ public class MysqlFactory {
      * @param key 字段名
      * @return 新的Factory
      */
-    public MysqlFactory removeCreate(String key) {
+    public SqlFactory removeCreate(String key) {
         this.create.removeIf(create -> create.getName().equalsIgnoreCase(key));
         return this;
     }
@@ -189,7 +222,7 @@ public class MysqlFactory {
      * @param group 分组字段
      * @return 新的Factory
      */
-    public MysqlFactory group(String group) {
+    public SqlFactory group(String group) {
         this.group = group;
         return this;
     }
@@ -199,7 +232,7 @@ public class MysqlFactory {
      *
      * @return 新的Factory
      */
-    public MysqlFactory removeGroup() {
+    public SqlFactory removeGroup() {
         this.group = null;
         return this;
     }
@@ -211,7 +244,7 @@ public class MysqlFactory {
      * @param value 值
      * @return 新的Factory
      */
-    public MysqlFactory condition(String key, String value) {
+    public SqlFactory condition(String key, String value) {
         this.conditions.add(new Condition(key, value, "AND"));
         return this;
     }
@@ -230,7 +263,7 @@ public class MysqlFactory {
      * </ul>
      * @return 新的Factory
      */
-    public MysqlFactory condition(String key, String value, String type) {
+    public SqlFactory condition(String key, String value, String type) {
         if (!type.equalsIgnoreCase("OR") && !type.equalsIgnoreCase("AND")) {
             try {
                 throw new Exception("Unknown type, you can set 'OR' or 'AND'");
@@ -249,7 +282,7 @@ public class MysqlFactory {
      * @param key 对象
      * @return 新的Factory
      */
-    public MysqlFactory removeCondition(String key) {
+    public SqlFactory removeCondition(String key) {
         this.conditions.removeIf(condition -> condition.getKey().equalsIgnoreCase(key));
         return this;
     }
@@ -261,7 +294,7 @@ public class MysqlFactory {
      * @param value 值
      * @return 新的Factory
      */
-    public MysqlFactory removeCondition(String key, String value) {
+    public SqlFactory removeCondition(String key, String value) {
         this.conditions.removeIf(condition -> condition.getKey().equalsIgnoreCase(key) && condition.getString().equalsIgnoreCase(value));
         return this;
     }
@@ -274,7 +307,7 @@ public class MysqlFactory {
      * @param type 判断类型
      * @return 新的Factory
      */
-    public MysqlFactory removeCondition(String key, String value, String type) {
+    public SqlFactory removeCondition(String key, String value, String type) {
         this.conditions.removeIf(condition -> condition.getKey().equalsIgnoreCase(key) && condition.getString().equalsIgnoreCase(value) && condition.getType().equalsIgnoreCase(type));
         return this;
     }
@@ -285,7 +318,7 @@ public class MysqlFactory {
      * @param key 列名称
      * @return 新的Factory
      */
-    public MysqlFactory insert(String... key) {
+    public SqlFactory insert(String... key) {
         this.inserts.addAll(Arrays.asList(key));
         return this;
     }
@@ -296,7 +329,7 @@ public class MysqlFactory {
      * @param key 列名称
      * @return 新的Factory
      */
-    public MysqlFactory removeInsert(String key) {
+    public SqlFactory removeInsert(String key) {
         this.inserts.remove(key);
         return this;
     }
@@ -308,7 +341,7 @@ public class MysqlFactory {
      * @param value 更新值
      * @return 新的Factory
      */
-    public MysqlFactory set(String key, String value) {
+    public SqlFactory set(String key, String value) {
         sets.add(new Set(key, value));
         return this;
     }
@@ -320,7 +353,7 @@ public class MysqlFactory {
      * @param key 键值
      * @return 新的Factory
      */
-    public MysqlFactory removeSet(String key) {
+    public SqlFactory removeSet(String key) {
         this.sets.removeIf(set -> set.getKey().equalsIgnoreCase(key));
         return this;
     }
