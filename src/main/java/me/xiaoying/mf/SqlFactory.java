@@ -468,7 +468,7 @@ public class SqlFactory {
             else
                 stringBuilder.append(", ").append(this.tables.get(i));
         }
-        stringBuilder.append(" VALUE (");
+        stringBuilder.append(" VALUES (");
 
         String s = null;
         for (String insert : this.inserts) {
