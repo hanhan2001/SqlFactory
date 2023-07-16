@@ -472,6 +472,9 @@ public class SqlFactory {
 
         String s = null;
         for (String insert : this.inserts) {
+            if (!Character.isDigit(insert.charAt(0)))
+                insert = "\"" + insert + "\"";
+
             if (s == null) {
                 stringBuilder.append(insert);
                 s = insert;
