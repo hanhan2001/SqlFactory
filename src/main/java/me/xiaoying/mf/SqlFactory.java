@@ -61,25 +61,21 @@ public class SqlFactory {
      *
      * @return Connection
      */
-    public Connection getConnection() {
+    public Connection getConnection() throws SQLException {
         String type;
 
-        try {
-            type = this.host.split(":")[1];
-            switch (type.toUpperCase()) {
-                case "MYSQL": {
-                    DriverManager.registerDriver(new Driver());
-                    return DriverManager.getConnection(this.host + ":" + this.port + "/" + this.database, this.user, this.pass);
-                }
-                case "SQLITE": {
-                    DriverManager.registerDriver(new JDBC());
-                    return DriverManager.getConnection(this.host + ":" + this.file);
-                }
-                default:
-                    ExceptionUtil.throwException(new UnknownDatabaseType("SqlFactory just use to Mysql or Sqlite"));
+        type = this.host.split(":")[1];
+        switch (type.toUpperCase()) {
+            case "MYSQL": {
+                DriverManager.registerDriver(new Driver());
+                return DriverManager.getConnection(this.host + ":" + this.port + "/" + this.database, this.user, this.pass);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            case "SQLITE": {
+                DriverManager.registerDriver(new JDBC());
+                return DriverManager.getConnection(this.host + ":" + this.file);
+            }
+            default:
+                ExceptionUtil.throwException(new UnknownDatabaseType("SqlFactory just use to Mysql or Sqlite"));
         }
 
         return null;
@@ -148,9 +144,8 @@ public class SqlFactory {
      * 执行sql语句
      */
     public Map<String, List<Object>> run() {
-        Connection conn = this.getConnection();
-
         try {
+            Connection conn = this.getConnection();
             PreparedStatement stmt = conn.prepareStatement(this.getSql());
             if (this.type != SqlType.SELECT) {
                 stmt.executeUpdate();
