@@ -167,7 +167,7 @@ public class SqlFactory {
                     else
                         list = map.get(s);
 
-                    list.add(rs.getObject(s));
+                    list.add(rs.getObject(s.replace("`", "")));
                     map.put(s, list);
                 }
             }
