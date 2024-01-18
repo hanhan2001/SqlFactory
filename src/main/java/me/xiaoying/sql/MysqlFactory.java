@@ -18,7 +18,6 @@ public class MysqlFactory extends SqlFactory {
     String database;
     String user;
     String password;
-    Sentence sentence;
 
     /**
      * MysqlFactory
