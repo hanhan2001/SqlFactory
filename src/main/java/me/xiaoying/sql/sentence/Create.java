@@ -12,7 +12,7 @@ public class Create extends Sentence {
 
     @Override
     public String merge() {
-        StringBuilder stringBuilder = new StringBuilder("CREATE if NOT EXIST ");
+        StringBuilder stringBuilder = new StringBuilder("CREATE TABLE if NOT EXISTS ");
         for (int i = 0; i < this.tables.size(); i++) {
             stringBuilder.append(this.tables.get(i));
 
