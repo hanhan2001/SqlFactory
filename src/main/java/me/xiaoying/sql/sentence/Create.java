@@ -26,10 +26,9 @@ public class Create extends Sentence {
         for (int i = 0; i < this.getColumns().size(); i++) {
             Column column = this.columns.get(i);
             stringBuilder.append(column.getName()).append(" ")
-                    .append(column.getType())
-                    .append("(")
-                    .append(column.getType())
-                    .append(")");
+                    .append(column.getType());
+            if (column.getSize() != 0)
+                stringBuilder.append("(").append(column.getSize()).append(")");
             if (i == this.getColumns().size() - 1)
                 break;
 
