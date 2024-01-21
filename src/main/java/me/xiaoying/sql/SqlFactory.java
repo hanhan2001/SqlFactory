@@ -87,7 +87,7 @@ public abstract class SqlFactory {
      * @param rs ResultSet
      * @throws SQLException 异常
      */
-    private void closeAll(Connection conn, Statement stmt, ResultSet rs) throws SQLException {
+    void closeAll(Connection conn, Statement stmt, ResultSet rs) throws SQLException {
         if (rs != null) rs.close();
         if (stmt != null) stmt.close();
         if (conn != null) conn.close();

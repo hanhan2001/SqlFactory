@@ -48,13 +48,15 @@ public class MysqlFactory extends SqlFactory {
         // 1 = 0 避免查询实际存在数据，减少查询速度
         String sqlString = "SELECT * FROM " + table + " WHERE 1 = 0";
         try {
-            PreparedStatement stmt = this.getConnection().prepareStatement(sqlString);
+            Connection conn = this.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sqlString);
             ResultSet rs = stmt.executeQuery();
-
             ResultSetMetaData rsmd = rs.getMetaData();
 
             for (int i = 1; i <= rsmd.getColumnCount(); i++)
                 columns.add(new Column(table + "." + rsmd.getColumnName(i), rsmd.getColumnTypeName(i), rsmd.getColumnDisplaySize(i)));
+
+            this.closeAll(conn, stmt, rs);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -64,15 +66,19 @@ public class MysqlFactory extends SqlFactory {
     @Override
     public long getTotalRecord(String table) {
         String sqlString = "SELECT COUNT(*) FROM " + table;
+        long num = 0;
         try {
-            PreparedStatement stmt = this.getConnection().prepareStatement(sqlString);
+            Connection conn = this.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sqlString);
             ResultSet rs = stmt.executeQuery();
             if (rs.next())
-                return rs.getLong("COUNT(*)");
+                num =  rs.getLong("COUNT(*)");
+
+            super.closeAll(conn, stmt, rs);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return 0;
+        return num;
     }
 
     @Override
@@ -92,6 +98,7 @@ public class MysqlFactory extends SqlFactory {
             PreparedStatement stmt = conn.prepareStatement(this.toString());
             if (!(this.sentence instanceof Select)) {
                 stmt.executeUpdate();
+                this.closeAll(conn, stmt, null);
                 return null;
             }
 
@@ -104,6 +111,7 @@ public class MysqlFactory extends SqlFactory {
 
                 records.add(record);
             }
+            this.closeAll(conn, stmt, rs);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
