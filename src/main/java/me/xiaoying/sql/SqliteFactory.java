@@ -44,6 +44,20 @@ public class SqliteFactory extends SqlFactory {
     }
 
     @Override
+    public long getTotalRecord(String table) {
+        String sqlString = "SELECT COUNT(*) FROM " + table;
+        try {
+            PreparedStatement stmt = this.getConnection().prepareStatement(sqlString);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next())
+                return rs.getLong("COUNT(*)");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return 0;
+    }
+
+    @Override
     public SqlFactory sentence(Sentence sentence) {
         this.sentence = sentence;
         return this;

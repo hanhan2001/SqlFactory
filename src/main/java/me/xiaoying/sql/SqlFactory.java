@@ -37,6 +37,7 @@ public abstract class SqlFactory {
      * @return Stack
      */
     public abstract Stack<Column> getColumns(String table);
+    public abstract long getTotalRecord(String table);
 
     /**
      * 设置操作表
