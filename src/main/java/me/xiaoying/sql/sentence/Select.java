@@ -25,7 +25,7 @@ public class Select extends Sentence {
 
         if (this.columns.size() != 0) {
             for (int i = 0; i < this.columns.size(); i++) {
-                String[] split = this.columns.get(i).getName().split("\\.");
+                String[] split = this.columns.get(i).getFullName().split("\\.");
                 column.append(split[0]).append(".`").append(split[1]).append("`");
 
                 if (i == this.columns.size() - 1)
