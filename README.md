@@ -1,3 +1,11 @@
+# Well, I have refactored all code.
+
+# I will remake a new markdown, if I have time.
+
+
+
+
+
 # SqlFactory
 
 ## SqlType
