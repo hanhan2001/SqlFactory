@@ -64,6 +64,22 @@ public class MysqlFactory extends SqlFactory {
     }
 
     @Override
+    public boolean containsTable(String table) {
+        try {
+            Connection conn = this.getConnection();
+            DatabaseMetaData dbmd = conn.getMetaData();
+            ResultSet rs = dbmd.getTables(null, null, table, null);
+            if (rs.next())
+                return true;
+
+            this.closeAll(conn, null, null);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
+
+    @Override
     public long getTotalRecord(String table) {
         String sqlString = "SELECT COUNT(*) FROM " + table;
         long num = 0;
