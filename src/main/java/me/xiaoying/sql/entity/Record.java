@@ -17,6 +17,16 @@ public class Record {
         return this.values.get(column);
     }
 
+    public Object get(String column) {
+        for (Column col : this.values.keySet()) {
+            if (!col.getName().equalsIgnoreCase(column))
+                continue;
+
+            return this.values.get(col);
+        }
+        return null;
+    }
+
     public List<Column> getColumns() {
         return new ArrayList<>(this.values.keySet());
     }
