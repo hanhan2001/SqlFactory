@@ -1,12 +1,49 @@
 package me.xiaoying.sql.entity;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Column 列
  */
 public class Column {
-    String name;
-    String type;
-    long size;
+    private final String name;
+    private final String type;
+    private long size;
+    private String[] parameter = new String[0];
+
+    public Column(String name, String type, String... parameter) {
+        this.name = name;
+        this.type = type;
+
+        if (parameter.length == 0)
+            return;
+
+        if (parameter.length == 1) {
+            try {
+                this.size = Long.parseLong(parameter[0]);
+            } catch (Exception e) {
+                this.parameter = parameter;
+            }
+            return;
+        }
+
+        boolean firstIsNumber;
+        try {
+            this.size = Long.parseLong(parameter[0]);
+            firstIsNumber = true;
+        } catch (Exception e) {
+            firstIsNumber = false;
+        }
+
+        if (firstIsNumber) {
+            List<String> list = new ArrayList<>(Arrays.asList(parameter).subList(1, parameter.length));
+            parameter = list.toArray(new String[0]);
+        }
+
+        this.parameter = parameter;
+    }
 
     public Column(String name, String type, long size) {
         this.name = name;
@@ -46,5 +83,9 @@ public class Column {
 
     public long getSize() {
         return this.size;
+    }
+
+    public String[] getParameter() {
+        return this.parameter;
     }
 }
