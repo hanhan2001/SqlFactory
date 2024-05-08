@@ -14,7 +14,7 @@ If you want use this tool, you need do these.
 
 2. build this project
 
-3. use maven command `maven install:install-file -DgroupId=me.xiaoying -DartifactId=SqlFactory -Dverion=0.0.2 -Dpackaging=jar -Dfile=SqlFactory-V0.0.2.jar`
+3. use maven command `maven install:install-file -DgroupId=me.xiaoying -DartifactId=SqlFactory -Dversion=0.0.2 -Dpackaging=jar -Dfile=SqlFactory-V0.0.2.jar`
 
 4. import SqlFactory in `pom.xml`
 
