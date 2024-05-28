@@ -118,7 +118,7 @@ public class SqliteFactory extends SqlFactory {
 
     @Override
     public String toString() {
-        if (this.sentence.getColumns().size() == 0)
+        if (this.sentence.getColumns().isEmpty())
             for (String table : this.sentence.getTables()) this.sentence.setColumns(this.getColumns(table));
 
         if (this.getCondition() == null)
