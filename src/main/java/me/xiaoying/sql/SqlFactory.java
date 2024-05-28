@@ -19,8 +19,8 @@ import java.util.Stack;
  */
 public abstract class SqlFactory {
     private final List<String> tables = new ArrayList<>();
-    Sentence sentence;
-    Condition condition;
+    protected Sentence sentence;
+    private Condition condition;
 
     /**
      * 获取链接

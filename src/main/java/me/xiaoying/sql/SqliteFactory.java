@@ -10,8 +10,8 @@ import java.sql.*;
 import java.util.Stack;
 
 public class SqliteFactory extends SqlFactory {
-    String path;
-    String file;
+    private final String path;
+    private final String file;
 
     public SqliteFactory(String path, String file) {
         this.path = path;

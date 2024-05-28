@@ -13,11 +13,11 @@ import java.util.*;
  * SqlFactory Mysql
  */
 public class MysqlFactory extends SqlFactory {
-    String host;
-    int port;
-    String database;
-    String user;
-    String password;
+    private final String host;
+    private final int port;
+    private final String database;
+    private final String user;
+    private final String password;
 
     /**
      * MysqlFactory
