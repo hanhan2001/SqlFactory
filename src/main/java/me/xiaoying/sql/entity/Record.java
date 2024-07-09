@@ -1,33 +1,39 @@
 package me.xiaoying.sql.entity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+/**
+ * Table Record
+ */
 public class Record {
-    Map<Column, Object> values = new HashMap<>();
+    private final Table table;
 
-    public Record put(Column column, Object value) {
-        this.values.put(column, value);
-        return this;
+    public Record(Table table) {
+        this.table = table;
     }
 
-    public Object get(Column column) {
-        return this.values.get(column);
-    }
+    public Object get(int index) {
+        if (index > this.table.getColumns().size())
+            return null;
 
-    public Object get(String column) {
-        for (Column col : this.values.keySet()) {
-            if (!col.getName().equalsIgnoreCase(column))
+        for (int i = 0; i < this.table.getColumns().size(); i++) {
+            if (i != index)
                 continue;
 
-            return this.values.get(col);
+            return this.table.getColumns().get(i).getValue();
         }
         return null;
     }
 
-    public List<Column> getColumns() {
-        return new ArrayList<>(this.values.keySet());
+    public Object get(String column) {
+        for (Column tableColumn : this.table.getColumns()) {
+            if (!tableColumn.getName().equalsIgnoreCase(column))
+                continue;
+
+            return tableColumn.getValue();
+        }
+        return null;
+    }
+
+    public Table getTable() {
+        return this.table;
     }
 }

@@ -2,60 +2,60 @@ package me.xiaoying.sql.sentence;
 
 import me.xiaoying.sql.entity.Column;
 
+import java.security.InvalidParameterException;
+import java.util.List;
+
 /**
- * Sentence Create
+ * Sentence of sql
  */
 public class Create extends Sentence {
-    public Create(String table, String... tables) {
+    private final List<Column> columns;
+
+    public Create(List<Column> columns, String table, String... tables) {
         super(table, tables);
+        if (columns == null || columns.isEmpty())
+            throw new RuntimeException(new InvalidParameterException("Column can't be empty when create table."));
+        this.columns = columns;
     }
 
     @Override
     public String merge() {
-        StringBuilder stringBuilder = new StringBuilder("CREATE TABLE if NOT EXISTS ");
-        for (int i = 0; i < this.tables.size(); i++) {
-            stringBuilder.append(this.tables.get(i));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("CREATE TABLE IF NOT EXISTS ");
+        // merge tables
+        stringBuilder.append(this.getTablesAsString());
+        stringBuilder.append(" ");
 
-            if (i == this.tables.size() - 1)
-                break;
+        // merge columns
+        stringBuilder.append("(");
+        if (this.columns.isEmpty())
+            throw new RuntimeException(new InvalidParameterException("Column can't be empty when create table."));
 
-            stringBuilder.append(", ");
-        }
-        stringBuilder.append(" (");
-
-        for (int i = 0; i < this.getColumns().size(); i++) {
+        for (int i = 0; i < this.columns.size(); i++) {
             Column column = this.columns.get(i);
-            stringBuilder.append(column.getName()).append(" ")
-                    .append(column.getType());
 
-            if (column.getSize() != 0 || column.getParameter().length != 0) {
-                stringBuilder.append("(");
-                if (column.getSize() != 0)
-                    stringBuilder.append(column.getSize());
+            stringBuilder.append("`").append(column.getName()).append("` ");
+            stringBuilder.append(column.getType()).append("(");
+            stringBuilder.append(column.getSize()).append(")");
 
-                if (column.getSize() != 0 && column.getParameter().length != 0)
-                    stringBuilder.append(", ");
+            if (column.canNull())
+                stringBuilder.append(" DEFAULT NULL");
+            else
+                stringBuilder.append(" NOT NULL");
 
-                if (column.getParameter().length != 0) {
-                    for (int i1 = 0; i1 < column.getParameter().length; i1++) {
-                        stringBuilder.append(column.getParameter()[i1]);
-
-                        if (i1 == column.getParameter().length - 1)
-                            break;
-
-                        stringBuilder.append(", ");
-                    }
-                }
-
-                stringBuilder.append(")");
-            }
-
-            if (i == this.getColumns().size() - 1)
+            if (i == this.columns.size() - 1)
                 break;
 
             stringBuilder.append(", ");
         }
         stringBuilder.append(")");
+
+        // create can't use condition, so I haven't made it
         return stringBuilder.toString();
+    }
+
+    @Override
+    public Sentence condition(Condition condition) {
+        return this;
     }
 }

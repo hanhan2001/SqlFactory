@@ -1,40 +1,51 @@
 package me.xiaoying.sql.sentence;
 
-import me.xiaoying.sql.entity.Column;
-
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
 
 /**
- * Sentence
+ * Sql sentence
  */
 public abstract class Sentence {
-    List<String> tables = new ArrayList<>();
-    Stack<Column> columns = new Stack<>();
+    protected final List<String> tables = new ArrayList<>();
+    protected final List<Condition> conditions = new ArrayList<>();
 
     public Sentence(String table, String... tables) {
         this.tables.add(table);
-        Collections.addAll(this.tables, tables);
+
+        if (tables.length == 0)
+            return;
+
+        this.tables.addAll(Arrays.asList(tables));
     }
 
     public List<String> getTables() {
         return this.tables;
     }
 
-    public Stack<Column> getColumns() {
-        return this.columns;
+    public String getTablesAsString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < this.tables.size(); i++) {
+            stringBuilder.append("`").append(this.getTables().get(i)).append("`");
+
+            if (i == this.tables.size() - 1)
+                break;
+
+            stringBuilder.append(", ");
+        }
+        return stringBuilder.toString();
     }
 
-    public void setColumns(Stack<Column> columns) {
-        for (Column column : columns) {
-            if (this.columns.contains(column))
-                continue;
-
-            this.columns.add(column);
-        }
+    public Sentence condition(Condition condition) {
+        this.conditions.add(condition);
+        return this;
     }
 
     public abstract String merge();
+
+    @Override
+    public String toString() {
+        return this.merge();
+    }
 }
