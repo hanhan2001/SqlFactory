@@ -46,7 +46,6 @@ public class MysqlFactory extends SqlFactory {
         List<Table> tables = new ArrayList<>();
         try {
             for (Sentence sentence : sentences) {
-                System.out.println(sentence);
                 Connection conn = this.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sentence.merge());
                 if (!(sentence instanceof Select)) {
