@@ -37,8 +37,22 @@ public abstract class SqlFactory {
      */
     public abstract Connection getConnection() throws SQLException;
 
+    /**
+     * Run sentence
+     *
+     * @param sentences Sentence[]
+     * @return ArrayList
+     */
     public abstract List<Table> run(Sentence... sentences);
 
+    /**
+     * Close all
+     *
+     * @param conn Connection
+     * @param stmt PreparedStatement
+     * @param rs ResultSet
+     * @throws SQLException Exception
+     */
     public void closeAll(Connection conn, PreparedStatement stmt, ResultSet rs) throws SQLException {
         if (rs != null) rs.close();
         if (stmt != null) stmt.close();

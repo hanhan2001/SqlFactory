@@ -1,6 +1,5 @@
 package me.xiaoying.sql.sentence;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,45 +8,42 @@ import java.util.List;
 public class Select extends Sentence {
     private List<String> columns;
 
+    /**
+     * Constructor
+     *
+     * @param table table's name
+     * @param tables multi tables' name
+     */
     public Select(String table, String... tables) {
         super(table, tables);
     }
 
+    /**
+     * Constructor
+     *
+     * @param columns List(String)
+     * @param table table's name
+     * @param tables multi tables' name
+     */
     public Select(List<String> columns, String table, String... tables) {
         super(table, tables);
         this.columns = columns;
     }
 
+    /**
+     * Get columns for this sentence
+     *
+     * @return ArrayList
+     */
     public List<String> getColumns() {
         return this.columns;
     }
 
-    public List<String> getColumnsOnlyName() {
-        List<String> list = new ArrayList<>();
-        for (String column : this.columns) {
-            if (!column.contains(".")) {
-                list.add(column);
-                continue;
-            }
-
-            String[] split = column.split("\\.");
-            list.add(split[split.length - 1]);
-        }
-        return list;
-    }
-
-    public boolean containsColumn(String table, String column) {
-        for (String s : this.columns) {
-            if (s.contains(".")) {
-                String[] split = s.split("\\.");
-                if (split[0].equalsIgnoreCase(table) && split[1].equalsIgnoreCase(column))
-                    return true;
-            } else if (s.equalsIgnoreCase(column))
-                return false;
-        }
-        return true;
-    }
-
+    /**
+     * Merge sentence to String
+     *
+     * @return String
+     */
     @Override
     public String merge() {
         StringBuilder stringBuilder = new StringBuilder("SELECT ");

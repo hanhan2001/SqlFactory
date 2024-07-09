@@ -10,10 +10,21 @@ public class Record {
     private final Table table;
     private final Map<Column, Object> values = new HashMap<>();
 
+    /**
+     * Constructor
+     *
+     * @param table record's table
+     */
     public Record(Table table) {
         this.table = table;
     }
 
+    /**
+     * Get value by serial number
+     *
+     * @param index Integer
+     * @return Object
+     */
     public Object get(int index) {
         if (index > this.values.size())
             return null;
@@ -28,6 +39,12 @@ public class Record {
         return null;
     }
 
+    /**
+     * Get value by column's name
+     *
+     * @param column Column
+     * @return Object
+     */
     public Object get(String column) {
         for (Column column1 : this.values.keySet()) {
             if (!column1.getName().equalsIgnoreCase(column))
@@ -37,6 +54,12 @@ public class Record {
         return null;
     }
 
+    /**
+     * Set value of column
+     *
+     * @param column Column
+     * @param value Object
+     */
     public void set(Column column, Object value) {
         if (!this.table.containColumn(column.getName()))
             this.table.setColumn(column);
@@ -44,6 +67,11 @@ public class Record {
         this.values.put(column, value);
     }
 
+    /**
+     * Get record's table
+     *
+     * @return Table
+     */
     public Table getTable() {
         return this.table;
     }

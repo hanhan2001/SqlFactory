@@ -11,6 +11,12 @@ public abstract class Sentence {
     protected final List<String> tables = new ArrayList<>();
     protected final List<Condition> conditions = new ArrayList<>();
 
+    /**
+     * Constructor
+     *
+     * @param table table's name
+     * @param tables multi tables' name
+     */
     public Sentence(String table, String... tables) {
         this.tables.add(table);
 
@@ -20,10 +26,20 @@ public abstract class Sentence {
         this.tables.addAll(Arrays.asList(tables));
     }
 
+    /**
+     * Get tables for this sentence
+     *
+     * @return ArrayList
+     */
     public List<String> getTables() {
         return this.tables;
     }
 
+    /**
+     * Get tables as string for this sentence
+     *
+     * @return String
+     */
     public String getTablesAsString() {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < this.tables.size(); i++) {
@@ -37,11 +53,22 @@ public abstract class Sentence {
         return stringBuilder.toString();
     }
 
+    /**
+     * Add new condition for this
+     *
+     * @param condition Condition[]
+     * @return Condition
+     */
     public Sentence condition(Condition condition) {
         this.conditions.add(condition);
         return this;
     }
 
+    /**
+     * Merge sentence to String
+     *
+     * @return String
+     */
     public abstract String merge();
 
     @Override

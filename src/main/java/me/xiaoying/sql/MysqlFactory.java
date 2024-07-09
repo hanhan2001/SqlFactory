@@ -11,6 +11,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Factory of Sql sentence for Mysql
+ */
 public class MysqlFactory extends SqlFactory {
     private final String host;
     private final int port;
@@ -19,6 +22,15 @@ public class MysqlFactory extends SqlFactory {
     private final String password;
     private Connection connection = null;
 
+    /**
+     * Constructor
+     *
+     * @param host sql server's host
+     * @param port sql server's port
+     * @param database sql server's database
+     * @param username sql server's username
+     * @param password sql server's password
+     */
     public MysqlFactory(String host, int port, String database, String username, String password) {
         this.host = host;
         this.port = port;
@@ -27,6 +39,11 @@ public class MysqlFactory extends SqlFactory {
         this.password = password;
     }
 
+    /**
+     * Get connection with sql server
+     *
+     * @return Connection
+     */
     @Override
     public Connection getConnection() throws SQLException {
         DriverManager.registerDriver(new Driver());
@@ -41,6 +58,12 @@ public class MysqlFactory extends SqlFactory {
         }
     }
 
+    /**
+     * Run sentence
+     *
+     * @param sentences Sentence[]
+     * @return ArrayList
+     */
     @Override
     public List<Table> run(Sentence... sentences) {
         List<Table> tables = new ArrayList<>();

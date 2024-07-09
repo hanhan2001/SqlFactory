@@ -4,10 +4,21 @@ package me.xiaoying.sql.sentence;
  * Sentence of
  */
 public class Delete extends Sentence {
+    /**
+     * Constructor
+     *
+     * @param table table's name
+     * @param tables multi tables' name
+     */
     public Delete(String table, String... tables) {
         super(table, tables);
     }
 
+    /**
+     * Merge sentence to String
+     *
+     * @return String
+     */
     @Override
     public String merge() {
         StringBuilder stringBuilder = new StringBuilder("DELETE FROM ");

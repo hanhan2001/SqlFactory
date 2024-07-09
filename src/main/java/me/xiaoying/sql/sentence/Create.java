@@ -61,6 +61,7 @@ public class Create extends Sentence {
      * @return Sentence
      */
     @Override
+    @Deprecated
     public Sentence condition(Condition condition) {
         return this;
     }

@@ -8,10 +8,21 @@ import java.util.Stack;
 public class Insert extends Sentence {
     private Stack<String> inserts = new Stack<>();
 
+    /**
+     * Constructor
+     *
+     * @param table table's name
+     * @param tables multi tables' name
+     */
     public Insert(String table, String... tables) {
         super(table, tables);
     }
 
+    /**
+     * Add insert value
+     *
+     * @param values Object[]
+     */
     public void insert(Object... values) {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -31,6 +42,11 @@ public class Insert extends Sentence {
         this.inserts.add(stringBuilder.toString());
     }
 
+    /**
+     * Merge sentence to String
+     *
+     * @return String
+     */
     @Override
     public String merge() {
         StringBuilder stringBuilder = new StringBuilder("INSERT INTO ");

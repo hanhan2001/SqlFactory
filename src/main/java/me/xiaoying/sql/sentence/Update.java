@@ -11,19 +11,44 @@ import java.util.Map;
 public class Update extends Sentence {
     private Map<String, Object> sets = new HashMap<>();
 
+    /**
+     * Constructor
+     *
+     * @param table table's name
+     * @param tables multi tables' name
+     */
     public Update(String table, String... tables) {
         super(table, tables);
     }
 
+    /**
+     * Add set
+     *
+     * @param column Column
+     * @param value Object
+     * @return Update
+     */
     public Update set(Column column, Object value) {
         return this.set(column.getName(), value);
     }
 
+    /**
+     * Add set
+     *
+     * @param key String
+     * @param value Object
+     * @return Update
+     */
     public Update set(String key, Object value) {
         this.sets.put(key, value);
         return this;
     }
 
+    /**
+     * Merge sentence to String
+     *
+     * @return String
+     */
     @Override
     public String merge() {
         StringBuilder stringBuilder = new StringBuilder("UPDATE ");

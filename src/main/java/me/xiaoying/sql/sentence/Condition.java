@@ -14,6 +14,15 @@ public class Condition {
     private Type connctionType = Type.AND;
     private final List<Condition> conditions = new ArrayList<>();
 
+    /**
+     * Constructor<br>
+     * If you used {@code Condition.Type.BETWEEN_AND} or {@code Condition.Type.IN}, you need set value's type to List<br>
+     * List's size need bigger than 2 when you set connection type of {@code BETWEEN_AND}
+     *
+     * @param key condition's key
+     * @param value condition's value
+     * @param type condition's type
+     */
     public Condition(Object key, Object value, Type type) {
         if (key instanceof String) {
             if (!key.toString().startsWith("`"))
@@ -33,20 +42,42 @@ public class Condition {
         this.type = type;
     }
 
+    /**
+     * Get connection type between this condition and other conditions
+     *
+     * @return Condition.Type
+     */
     public Type getConnctionType() {
         return this.connctionType;
     }
 
+    /**
+     * set the connection type between this condition and other conditions
+     *
+     * @param type Condition.Type
+     * @return Condition
+     */
     public Condition setConnectionType(Type type) {
         this.connctionType = type;
         return this;
     }
 
+    /**
+     * Add new condition for this
+     *
+     * @param conditions Condition[]
+     * @return Condition
+     */
     public Condition condition(Condition... conditions) {
         this.conditions.addAll(Arrays.asList(conditions));
         return this;
     }
 
+    /**
+     * Merge condition to string
+     *
+     * @return String
+     */
     public String merge() {
         if (this.conditions.isEmpty())
             return this.handleObject();

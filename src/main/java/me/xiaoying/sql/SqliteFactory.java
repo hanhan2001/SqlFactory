@@ -12,14 +12,27 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Factory of Sql sentence for Sqlite
+ */
 public class SqliteFactory extends SqlFactory {
     private final File file;
     private Connection connection;
 
+    /**
+     * Constructor
+     *
+     * @param file sql server's file
+     */
     public SqliteFactory(File file) {
         this.file = file;
     }
 
+    /**
+     * Get connection with sql server
+     *
+     * @return Connection
+     */
     @Override
     public Connection getConnection() throws SQLException {
         DriverManager.registerDriver(new JDBC());
@@ -34,7 +47,12 @@ public class SqliteFactory extends SqlFactory {
         }
     }
 
-
+    /**
+     * Run sentence
+     *
+     * @param sentences Sentence[]
+     * @return ArrayList
+     */
     @Override
     public List<Table> run(Sentence... sentences) {
         List<Table> tables = new ArrayList<>();
