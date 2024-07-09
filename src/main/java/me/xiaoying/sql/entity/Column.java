@@ -8,7 +8,6 @@ public class Column {
     private final String name;
     private final String type;
     private final int size;
-    private Object value;
     private String alias = null;
     private final boolean _null;
 
@@ -24,11 +23,6 @@ public class Column {
         this.table = table;
     }
 
-    public Column(Table table, String name, String type, int size, Object value) {
-        this(table, name, type, size, true);
-        this.value = value;
-    }
-
     public String getName() {
         return this.name;
     }
@@ -39,10 +33,6 @@ public class Column {
 
     public int getSize() {
         return this.size;
-    }
-
-    public Object getValue() {
-        return this.value;
     }
 
     public Table getTable() {

@@ -54,6 +54,12 @@ public class Create extends Sentence {
         return stringBuilder.toString();
     }
 
+    /**
+     * This method is not supported in this sentence
+     *
+     * @param condition Condition
+     * @return Sentence
+     */
     @Override
     public Sentence condition(Condition condition) {
         return this;
