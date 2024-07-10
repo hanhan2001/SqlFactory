@@ -2,7 +2,7 @@
 
 > I haven't learnd apache or MyBatis, so I make this project.
 >
-> SqlFactory can usein sql database, for example: mysql, sqlite, access.
+> SqlFactory can use in sql database, for example: mysql, sqlite, access.
 
 
 
