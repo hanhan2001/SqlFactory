@@ -32,9 +32,7 @@ public class Condition {
         }
 
         this.key = key;
-        if (value instanceof Integer || value instanceof Long)
-            this.value = value;
-        else if (value instanceof String)
+        if (value instanceof String)
             this.value = "\"" + value + "\"";
         else
             this.value = value;
