@@ -15,7 +15,7 @@ If you want use SqlFactory, you need download jar in releases or build this repo
 
 ```xml
 <dependency>
-	<groupId>me.xiaoying</groupId>
+    <groupId>me.xiaoying</groupId>
     <artifactId>SqlFactory</artifactId>
     <version>0.0.2</version>
 </dependency>
@@ -29,7 +29,7 @@ Actually, I still can't use SqlFactory, event though I do it, so you need import
 
 ## Sentence
 
-> I just make some sentence for sql, maybe I will make more sentence in the future.
+> I just make some sentence for sql, maybe I make more sentence in the future.
 
 | Name   | Description        |
 | ------ | ------------------ |
