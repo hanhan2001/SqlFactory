@@ -21,8 +21,6 @@ public class Drop extends Sentence {
      */
     @Override
     public String merge() {
-        StringBuilder stringBuilder = new StringBuilder("DROP TABLE ");
-        stringBuilder.append(this.getTablesAsString());
-        return stringBuilder.toString();
+        return "DROP TABLE " + this.getTablesAsString();
     }
 }
