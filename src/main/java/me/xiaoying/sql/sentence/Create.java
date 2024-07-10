@@ -20,6 +20,9 @@ public class Create extends Sentence {
 
     @Override
     public String merge() {
+        if (this.columns.isEmpty())
+            throw new RuntimeException(new InvalidParameterException("Column can't be empty when create table."));
+
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("CREATE TABLE IF NOT EXISTS ");
         // merge tables
@@ -28,8 +31,6 @@ public class Create extends Sentence {
 
         // merge columns
         stringBuilder.append("(");
-        if (this.columns.isEmpty())
-            throw new RuntimeException(new InvalidParameterException("Column can't be empty when create table."));
 
         for (int i = 0; i < this.columns.size(); i++) {
             Column column = this.columns.get(i);

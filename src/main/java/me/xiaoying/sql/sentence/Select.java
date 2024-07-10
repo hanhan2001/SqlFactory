@@ -1,5 +1,6 @@
 package me.xiaoying.sql.sentence;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 
 /**
@@ -46,6 +47,9 @@ public class Select extends Sentence {
      */
     @Override
     public String merge() {
+        if (this.columns.isEmpty())
+            throw new RuntimeException(new InvalidParameterException("Column can't be empty when select record."));
+
         StringBuilder stringBuilder = new StringBuilder("SELECT ");
         // merge columns
         for (int i = 0; i < this.columns.size(); i++) {
