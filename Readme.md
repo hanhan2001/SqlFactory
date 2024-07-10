@@ -294,6 +294,29 @@ SqlFactory sqliteFactory = new SqlFactory(new File("C:/Users/Administrator/Deskt
 
 
 
+### Connection Type
+
+> If you use SqlFactory you can set connection type with sql server.
+
+```
+/**
+ * Set connection type for sql factory<br>
+ * <dl>
+ *     <dt>{@code INTERMITTENT}</dt>
+ *     <dd>create connection to sql server and stop when sql sentence finish.</dd>
+ *     <dt>{@code MAINTAIN}</dt>
+ *     <dd>maintain connection to sql server.</dd>
+ * </dl>
+ *
+ * @param type ConnectionType
+ */
+public void setConnectionType(ConnectionType type) {
+    this.connectionType = type;
+}
+```
+
+
+
 ### Run
 
 #### Single Sentence
