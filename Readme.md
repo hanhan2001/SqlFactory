@@ -1,32 +1,29 @@
 # SqlFactory
 
-> I don't want to learn apache's or MyBatis, so I make this repository.
+> I haven't learnd apache or MyBatis, so I make this project.
 >
-> SqlFactory can use in sql database, for example: mysql, sqlite, access.
+> SqlFactory can usein sql database, for example: mysql, sqlite, access.
 
 
 
 ## Use
 
-If you want use this tool, you need do these.
+If you want use SqlFactory, you need download jar in releases or build this repository.
 
-1. clone this repository.
+1. Use command of maven: `maven install:install-file -DgroupId=me.xiaoying -DartifactId=SqlFactory -Dversion=0.0.2 -Dpackaging=jar -Dfile=SqlFactory-V0.0.2.jar`
+2. Import SqlFactory in `pom.xml`
 
-2. build this project
+```xml
+<dependency>
+	<groupId>me.xiaoying</groupId>
+    <artifactId>SqlFactory</artifactId>
+    <version>0.0.2</version>
+</dependency>
+```
 
-3. use maven command `maven install:install-file -DgroupId=me.xiaoying -DartifactId=SqlFactory -Dversion=0.0.2 -Dpackaging=jar -Dfile=SqlFactory-V0.0.2.jar`
+If your build tool is Gradle, you can set `mavenLocal()` in `build.gradle`.
 
-4. import SqlFactory in `pom.xml`
-
-   ```xml
-   <dependency>
-       <groupId>me.xiaoying</groupId>
-       <artifactId>SqlFactory</artifactId>
-       <version>0.0.2</version>
-   </dependency>
-   ```
-
-If your build tool is gradle, you can set `mavenLocal()` to use SqlFactory, but I tried this way, that can't work, so you need import SqlFactory to your project directory.
+Actually, I still can't use SqlFactory, event though I do it, so you need import SqlFactory to your project directory.
 
 
 
@@ -41,147 +38,290 @@ If your build tool is gradle, you can set `mavenLocal()` to use SqlFactory, but 
 | Delete | Delete record.     |
 | Update | Update record.     |
 | Select | Select records.    |
+| Drop   | Delete table.      |
 
 
 
-## E&D
+### Create
 
-> These are some example code, you can learn how to use SqlFactory through these.
-
-
-
-### Factory
+> Can't use condition
 
 ```java
-SqlFactory mysql = new MysqlFactory("hostname", 3306, "database", "username", "password");
-SqlFactory sqlite = new SqliteFactory("jdbc:sqlite", File);
+List<Column> list = new ArrayList();
+// new Column("column's name", "column's type", column's size);
+list.add(new Column("name", "varchar", 255));
+list.add(new Column("age", "int", 3));
+
+Create create = new Create(list, "table's name", "multi tables");
+
+SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
+sqlFactory.run(create);
 ```
 
+### Insert
 
-
-### Table
-
----
-
-#### Create
-
-> Create a new table.
-
-```java
-// make new sentence of Create and table name is "table".
-Create create = new Create("table");
-// set table columns.
-Stack<Column> columns = new Stack<>();
-columns.add(new Column("first", "varchar", 255));
-columns.add(new Column("second", "int", 0));
-// create SqlFactory.
-SqlFactory sqlFactory = new MysqlFactory("hostname", 3306, "database", "username", "password");
-// set SqlFactory's sentence and run.
-sqlFactory.sentence(create).run();
-```
-
-
-
-#### Select
-
-> Select records.
+> Can't use condition
 
 ```java
 /**
- * make new sentence of Select and table name is "table".
- * <br>
- * you can set columns for select sentence, just like this.<br>
- * select.column(column1, column2);
+ * ╭─────────────────╮
+ * │ name      │ age │
+ * ├─────────────────┤
+ * │ ZhangMing │ 99  │
+ * ╰─────────────────╯
  */
-Select select = new Select("table");
-SqlFactory sqlFactory = new MysqlFactory("hostname", 3306, "database", "username", "password");
+
+Insert insert = new Insert("table's name", "multi tables");
+insert.insert("XiaoYing", 20);
+insert.insert("XiaoTan", 3);
+
+SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
+sqlFactory.run(insert);
 /**
- * set SqlFactory's sentence and run.<br>
- * <br>
- * you can do like this to.<br>
- * sqlFactory.sentence(select).condition(new Condition("condition column", "value", ConditionType.EQUAL)).run();
+ * ╭─────────────────╮
+ * │ name      │ age │
+ * ├─────────────────┤
+ * │ ZhangMing │ 99  │
+ * │ XiaoYing  │ 20  │
+ * │ XiaoTan   │ 3   │
+ * ╰─────────────────╯
  */
-sqlFactory.sentence(select).run();
 ```
 
 
 
-#### Update
-
-> Update record.
+### Delete
 
 ```java
-// make new sentence for Update and table name is "table".
-Update update = new Update("table");
-update.set("column", "value");
-update.set("column2", "value2");
-SqlFactory sqlFactory = new MysqlFactory("hostname", 3306, "database", "username", "password");
-sqlFactory.sentence(update).condition(new Condition("column", "vaule", ConditionType)).run();
+/**
+ * ╭─────────────────╮
+ * │ name      │ age │
+ * ├─────────────────┤
+ * │ ZhangMing │ 99  │
+ * │ XiaoYing  │ 20  │
+ * │ XiaoTan   │ 3   │
+ * ╰─────────────────╯
+ */
+Delete delete = new Delete("table's name", "multi tables");
+delete.condition(new Condition("name", "ZhangMing", Condition.Type.EQUAL));
+
+SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
+sqlFactory.run(delete);
+/**
+ * ╭─────────────────╮
+ * │ name      │ age │
+ * ├─────────────────┤
+ * │ XiaoYing  │ 20  │
+ * │ XiaoTan   │ 3   │
+ * ╰─────────────────╯
+ */
 ```
 
 
 
-#### Delete
-
-> Like update sentence, so I won't make sample code. (/▽＼)
-
-
-
-#### Insert
-
-> Insert new record.
+### Update
 
 ```java
-Insert insert = new Insert("table");
-// every time insert is called, a new record will be inserted.
-insert.insert("value1", "value2", "value3", "value4", "and more...");
-insert.insert("k1", "k2", "k3", "k4", "and more...");
-SqlFactory sqlFactory = new MysqlFactory("hostname", 3306, "database", "username", "password");
-sqlFactory.sentence(insert).run();
+/**
+ * ╭─────────────────╮
+ * │ name      │ age │
+ * ├─────────────────┤
+ * │ ZhangMing │ 99  │
+ * │ XiaoYing  │ 20  │
+ * │ XiaoTan   │ 3   │
+ * ╰─────────────────╯
+ */
+Update update = new Update("table's name", "multi tables");
+update.set("age", 0);
+update.condition(new Condition("name", "ZhangMing", Condition.Type.EQUAL));
+
+SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
+sqlFactory.run(delete);
+/**
+ * ╭─────────────────╮
+ * │ name      │ age │
+ * ├─────────────────┤
+ * │ ZhangMing │ 0   │
+ * │ XiaoYing  │ 20  │
+ * │ XiaoTan   │ 3   │
+ * ╰─────────────────╯
+ */
 ```
 
 
 
-### Condition
-
----
-
-#### ConditionType
-
-| Name          | Description |
-| ------------- | ----------- |
-| EQUAL         | ==          |
-| NOT_EQUAL     | <>          |
-| GREATER       | >           |
-| GREATER_EQUAL | >=          |
-| LESS          | <           |
-| LESS_EQUAL    | <=          |
-| LIKE          | like        |
-| AND           | and         |
-| OR            | or          |
-| IS_NULL       | null        |
-| NOT_NULL      | not null    |
-| NOT           | not         |
-
-#### Example
-
-> you can set sentence's condition before sentence is runned.
+### Select
 
 ```java
-// make new sentence... I use insert as an example.
+/**
+ * ╭─────────────────╮
+ * │ name      │ age │
+ * ├─────────────────┤
+ * │ ZhangMing │ 99  │
+ * │ XiaoYing  │ 20  │
+ * │ XiaoTan   │ 3   │
+ * ╰─────────────────╯
+ */
+List<String> list = new ArrayList();
+list.add("name");
+list.add("age");
+Select select = new Select(list, "table's name", "multi tables");
 
-SqlFactory sqlFactory = new MysqlFactory("hostname", 3306, "database", "username", "password");
-// set sentence for sqlFactory
-sqlFactory.sentence(insert);
-// make new condition
-Condition condition = new Condition("column", "value", ConditionType.EQUAL);
-sqlFactory.condition(condition);
+SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
+List<Table> tables = sqlFactory.run(select);
+/**
+ * ╭─────────────────╮
+ * │ name      │ age │
+ * ├─────────────────┤
+ * │ ZhangMing │ 99  │
+ * │ XiaoYing  │ 20  │
+ * │ XiaoTan   │ 3   │
+ * ╰─────────────────╯
+ */
 ```
 
-If you want make more condition for a sentence, you can do this.
+
+
+### Drop
 
 ```java
-Condition condition = new Condition("column", "value", ConditionType.EQUAL);
-condition.condition(new Condition("column2", "value2", ConditionType.EQUAL));
+Drop drop = new Drop("table's name", "multi tables");
+System.out.println(drop);
+// It will print "DROP TABLE `table's name`, `multi tables`" in console
+
+SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
+sqlFactory.run(drop);
 ```
 
+
+
+
+
+## Condition
+
+> I don't know how to explaint it, I tried make some code to do example
+
+Condition(Obejct, Object, Condition.Type)
+
+
+
+### Type
+
+| Name          | Description       |
+| ------------- | ----------------- |
+| EQUAL         | ==                |
+| NOT_EQUAL     | <>                |
+| GREATER       | >                 |
+| GREATER_EQUAL | >=                |
+| LESS          | <                 |
+| LESS_EQUAL    | <=                |
+| LIKE          | like              |
+| AND           | and               |
+| OR            | or                |
+| IS_NULL       | null              |
+| NOT_NULL      | not null          |
+| NOT           | not               |
+| IN            | in                |
+| BETWEEN_AND   | between {} and {} |
+
+
+
+### Normal
+
+```java
+// Condition condition = new Condition("field's name", value, Condition.Type);
+
+Condition condition = new Condition("name", "XiaoYing", Condition.Type.EQUAL);
+System.out.println(condition);
+// It will print "`name` = \"XiaoYing\"" in console
+```
+
+
+
+### Multi Condition
+
+> This is complicated method, perhaps you can try create some conditions by yourself to comparsion.
+
+```java
+Condition condition = new Condition("name", "XiaoYing", Condition.Type.EQUAL);
+List<Integer> ageList = new ArrayList();
+ageList.add(18);
+ageList.add(25);
+condition.condition(new Condition("age", ageList, Condition.BETWEEN_AND).setConnectionType(Condition.Type.OR));
+System.out.println(condition);
+// It will print "(`name` = \"Xiaoying\" OR `age` BETWEEN 18 AND 25)" in console
+```
+
+#### Nest
+
+```java
+Condition firstCondition = new Condition("name", "XiaoYing", Condition.Type.EQUAL);
+firstCondition.condition(new Condition("location", "China", Condition.Type.EQUAL));
+System.out.println(firstCondition);
+// It will print "(`name` = \"XiaoYing\" AND `location` = \"China\")" in console
+
+List<Integer> ageList = new ArrayList();
+ageList.add(18);
+ageList.add(25);
+Condition secondCondition = new Condition("age", ageList, Condition.Type.BETWEEN_AND);
+secondCondition.condition("location", "China", Condition.Type.EQUAL);
+// It will print "(`age` BETWEEN 18 AND 25 AND `location` = \"China\")" in console
+
+firstCondition.condition(secondCondition.setConnectionType(ConditionType.OR));
+System.out.println(firstCondition);
+// It will print "(`name` = \"XiaoYing\" AND `location` = \"China\") OR (`age` BETWEEN 18 AND 25 AND `location` = \"China\")" in console
+```
+
+
+
+## Factory
+
+> I made Mysql's and Sqlite's Factory.
+>
+> If you want, you can create new class and extend new class to SqlFactory.class
+
+
+
+### Constructor
+
+```java
+// Create MysqlFactory
+SqlFactory mysqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
+
+// Create SqliteFactory
+SqlFactory sqliteFactory = new SqlFactory(new File("C:/Users/Administrator/Desktop/database.db"));
+```
+
+
+
+### Run
+
+#### Single Sentence
+
+```java
+SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
+
+List<String> selectColumns = new ArrayList();
+Select select = new Select(selectColumns, "table", "multi tables");
+
+List<Table> tables = sqlFactory.run(select);
+```
+
+
+
+#### Multi Sentence
+
+```java
+SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
+
+Update update = new Update("table", "mulit tables");
+update.set("age", 18);
+update.set("location", "China");
+update.condition(new Condition("name", "XiaoYing"));
+
+List<String> selectColumns = new ArrayList();
+Select select = new Select(selectColumns, "table", "multi tables");
+
+// table list just contains select sentence's table
+List<Table> tables = sqlFactory.run(update, select);
+```
