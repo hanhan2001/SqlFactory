@@ -146,8 +146,12 @@ public class Table {
 
         // merge first
         stringBuilder.append("╭");
-        for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
-            stringBuilder.append("─");
+        if (this.columns.size() % 2 == 0)
+            for (int i = 0; i < maxLength.get() + 6 + map.size() + 1; i++)
+                stringBuilder.append("─");
+        else
+            for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
+                stringBuilder.append("─");
         stringBuilder.append("╮");
         stringBuilder.append("\n");
 
@@ -167,8 +171,12 @@ public class Table {
 
         // merge line
         stringBuilder.append("├");
-        for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
-            stringBuilder.append("─");
+        if (this.columns.size() % 2 == 0)
+            for (int i = 0; i < maxLength.get() + 6 + map.size() + 1; i++)
+                stringBuilder.append("─");
+        else
+            for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
+                stringBuilder.append("─");
         stringBuilder.append("┤");
         stringBuilder.append("\n");
 
@@ -189,8 +197,12 @@ public class Table {
 
         // merge end
         stringBuilder.append("╰");
-        for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
-            stringBuilder.append("─");
+        if (this.columns.size() % 2 == 0)
+            for (int i = 0; i < maxLength.get() + 6 + map.size() + 1; i++)
+                stringBuilder.append("─");
+        else
+            for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
+                stringBuilder.append("─");
         stringBuilder.append("╯");
         stringBuilder.append("\n");
         return stringBuilder.toString();
