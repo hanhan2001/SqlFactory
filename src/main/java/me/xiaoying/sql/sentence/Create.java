@@ -20,7 +20,7 @@ public class Create extends Sentence {
 
     @Override
     public String merge() {
-        if (this.columns.isEmpty())
+        if (this.columns == null || this.columns.isEmpty())
             throw new RuntimeException(new InvalidParameterException("Column can't be empty when create table."));
 
         StringBuilder stringBuilder = new StringBuilder();
