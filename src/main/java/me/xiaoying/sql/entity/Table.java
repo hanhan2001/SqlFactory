@@ -123,88 +123,166 @@ public class Table {
         StringBuilder stringBuilder = new StringBuilder();
 
         Map<String, Integer> map = new LinkedHashMap<>();
-        // calculate fields width
+        // calculate fields' width
         for (Record record : this.records) {
             for (Column column : this.getColumns()) {
                 int length = record.get(column.getName()).toString().length();
                 map.putIfAbsent(column.getName(), length);
 
                 if (map.get(column.getName()) < length)
-                    map.put(column.getName(), length);
+                    continue;
+
+                map.put(column.getName(), length);
             }
         }
 
         // merge fields
         // calculate max width of fields
-        AtomicInteger maxLength = new AtomicInteger();
-        map.forEach((key, length) -> {
-            if (map.get(key) < key.length())
-                map.put(key, key.length());
+        int maxLength = 0;
+        for (String s : map.keySet()) {
+            if (map.get(s) < s.length())
+                map.put(s, s.length());
 
-            maxLength.addAndGet(map.get(key));
-        });
+            maxLength += map.get(s);
+        }
 
         // merge first
         stringBuilder.append("╭");
-        if (this.columns.size() % 2 == 0)
-            for (int i = 0; i < maxLength.get() + 6 + map.size() + 1; i++)
-                stringBuilder.append("─");
-        else
-            for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
-                stringBuilder.append("─");
+        for (int i = 0; i < maxLength; i++)
+            stringBuilder.append("─");
+        for (int i = 0; i < 2 * this.columns.size() + this.columns.size() - 1; i++)
+            stringBuilder.append("─");
         stringBuilder.append("╮");
         stringBuilder.append("\n");
 
         // merge fields
-        int index = 0;
-        for (String s : map.keySet()) {
+        for (Column column : this.columns) {
             String format;
             if (stringBuilder.toString().endsWith("│"))
-                format = " %-" + map.get(this.columns.get(index).getName()) + "s │";
+                format = " %-" + map.get(column.getName()) + "s │";
             else
-                format = "│ %-" + map.get(this.columns.get(index).getName()) + "s │";
+                format = "│ %-" + map.get(column.getName()) + "s │";
 
-            stringBuilder.append(String.format(format, s));
-            index++;
+            stringBuilder.append(String.format(format, column.getName()));
         }
         stringBuilder.append("\n");
 
         // merge line
         stringBuilder.append("├");
-        if (this.columns.size() % 2 == 0)
-            for (int i = 0; i < maxLength.get() + 6 + map.size() + 1; i++)
-                stringBuilder.append("─");
-        else
-            for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
-                stringBuilder.append("─");
+        for (int i = 0; i < maxLength; i++)
+            stringBuilder.append("─");
+        for (int i = 0; i < 2 * this.columns.size() + this.columns.size() - 1; i++)
+            stringBuilder.append("─");
         stringBuilder.append("┤");
         stringBuilder.append("\n");
 
         // merge records
         for (Record record : this.records) {
-            for (int i = 0; i < this.columns.size(); i++) {
+            for (Column column : this.columns) {
                 String format;
                 if (stringBuilder.toString().endsWith("│"))
-                    format = " %-" + map.get(this.columns.get(i).getName()) + "s │";
+                    format = " %-" + map.get(column.getName()) + "s │";
                 else
-                    format = "│ %-" + map.get(this.columns.get(i).getName()) + "s │";
-                stringBuilder.append(String.format(format, record.get(this.columns.get(i).getName())));
+                    format = "│ %-" + map.get(column.getName()) + "s │";
 
-                if (i == this.columns.size() - 1)
-                    stringBuilder.append("\n");
+                stringBuilder.append(String.format(format, record.get(column.getName())));
             }
+            stringBuilder.append("\n");
         }
 
         // merge end
         stringBuilder.append("╰");
-        if (this.columns.size() % 2 == 0)
-            for (int i = 0; i < maxLength.get() + 6 + map.size() + 1; i++)
-                stringBuilder.append("─");
-        else
-            for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
-                stringBuilder.append("─");
+        for (int i = 0; i < maxLength; i++)
+            stringBuilder.append("─");
+        for (int i = 0; i < 2 * this.columns.size() + this.columns.size() - 1; i++)
+            stringBuilder.append("─");
         stringBuilder.append("╯");
         stringBuilder.append("\n");
+
+
+//        Map<String, Integer> map = new LinkedHashMap<>();
+//        // calculate fields width
+//        for (Record record : this.records) {
+//            for (Column column : this.getColumns()) {
+//                int length = record.get(column.getName()).toString().length();
+//                map.putIfAbsent(column.getName(), length);
+//
+//                if (map.get(column.getName()) < length)
+//                    map.put(column.getName(), length);
+//            }
+//        }
+//
+//        // merge fields
+//        // calculate max width of fields
+//        AtomicInteger maxLength = new AtomicInteger();
+//        map.forEach((key, length) -> {
+//            if (map.get(key) < key.length())
+//                map.put(key, key.length());
+//
+//            maxLength.addAndGet(map.get(key));
+//        });
+//
+//        // merge first
+//        stringBuilder.append("╭");
+//        if (this.columns.size() % 2 == 0)
+//            for (int i = 0; i < maxLength.get() + 6 + map.size() + 1; i++)
+//                stringBuilder.append("─");
+//        else
+//            for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
+//                stringBuilder.append("─");
+//        stringBuilder.append("╮");
+//        stringBuilder.append("\n");
+//
+//        // merge fields
+//        int index = 0;
+//        for (String s : map.keySet()) {
+//            String format;
+//            if (stringBuilder.toString().endsWith("│"))
+//                format = " %-" + map.get(this.columns.get(index).getName()) + "s │";
+//            else
+//                format = "│ %-" + map.get(this.columns.get(index).getName()) + "s │";
+//
+//            stringBuilder.append(String.format(format, s));
+//            index++;
+//        }
+//        stringBuilder.append("\n");
+//
+//        // merge line
+//        stringBuilder.append("├");
+//        if (this.columns.size() % 2 == 0)
+//            for (int i = 0; i < maxLength.get() + 6 + map.size() + 1; i++)
+//                stringBuilder.append("─");
+//        else
+//            for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
+//                stringBuilder.append("─");
+//        stringBuilder.append("┤");
+//        stringBuilder.append("\n");
+//
+//        // merge records
+//        for (Record record : this.records) {
+//            for (int i = 0; i < this.columns.size(); i++) {
+//                String format;
+//                if (stringBuilder.toString().endsWith("│"))
+//                    format = " %-" + map.get(this.columns.get(i).getName()) + "s │";
+//                else
+//                    format = "│ %-" + map.get(this.columns.get(i).getName()) + "s │";
+//                stringBuilder.append(String.format(format, record.get(this.columns.get(i).getName())));
+//
+//                if (i == this.columns.size() - 1)
+//                    stringBuilder.append("\n");
+//            }
+//        }
+//
+//        // merge end
+//        stringBuilder.append("╰");
+//        if (this.columns.size() % 2 == 0)
+//            for (int i = 0; i < maxLength.get() + 6 + map.size() + 1; i++)
+//                stringBuilder.append("─");
+//        else
+//            for (int i = 0; i < maxLength.get() + 6 + map.size() - 1; i++)
+//                stringBuilder.append("─");
+//        stringBuilder.append("╯");
+//        stringBuilder.append("\n");
         return stringBuilder.toString();
     }
 }
