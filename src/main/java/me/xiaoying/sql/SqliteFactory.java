@@ -39,7 +39,7 @@ public class SqliteFactory extends SqlFactory {
         switch (this.connectionType) {
             default:
             case INTERMITTENT:
-                return DriverManager.getConnection("jdbc:sqlite://" + this.file.getAbsolutePath());
+                return DriverManager.getConnection("jdbc:sqlite:" + this.file.getAbsolutePath().replace("\\", "/"));
             case MAINTAIN:
                 if (this.connection == null || this.connection.isClosed())
                     this.connection = DriverManager.getConnection("jdbc:sqlite://" + this.file.getAbsolutePath());
