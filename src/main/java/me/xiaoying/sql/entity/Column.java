@@ -49,6 +49,15 @@ public class Column {
     }
 
     /**
+     * Get falsehood name fo column
+     *
+     * @return String
+     */
+    public String getFalsehoodName() {
+        return this.getName().split("\\.")[1];
+    }
+
+    /**
      * Get type of column
      *
      * @return String
