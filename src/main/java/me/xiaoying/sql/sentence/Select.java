@@ -8,6 +8,8 @@ import java.util.List;
  */
 public class Select extends Sentence {
     private List<String> columns;
+    private OrderBy orderBy = null;
+    private String orderByColumn = null;
 
     /**
      * Constructor
@@ -38,6 +40,19 @@ public class Select extends Sentence {
      */
     public List<String> getColumns() {
         return this.columns;
+    }
+
+    /**
+     * Make sort of records
+     *
+     * @param column order column
+     * @param orderBy OrderBy type
+     * @return Select
+     */
+    public Select orderBy(String column, OrderBy orderBy) {
+        this.orderByColumn = column;
+        this.orderBy = orderBy;
+        return this;
     }
 
     /**
@@ -85,6 +100,32 @@ public class Select extends Sentence {
             else
                 stringBuilder.append(condition.getConnctionType()).append(" ").append(condition.merge());
         }
+
+        if (this.orderBy != null) {
+            stringBuilder.append(" ORDER BY ");
+            String column;
+            if (!this.orderByColumn.contains("."))
+                column = "`" + this.orderByColumn + "`";
+            else {
+                String[] split = this.orderByColumn.split("\\.");
+                column = split[0] + ".`" + split[1] + "`";
+            }
+
+            stringBuilder.append(column).append(" ");
+            switch (this.orderBy) {
+                case ASC:
+                    stringBuilder.append("ASC");
+                    break;
+                case DESC:
+                    stringBuilder.append("DESC");
+                    break;
+            }
+        }
         return stringBuilder.toString();
+    }
+
+    public enum OrderBy {
+        ASC,
+        DESC
     }
 }
