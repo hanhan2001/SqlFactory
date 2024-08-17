@@ -36,8 +36,9 @@ public class Create extends Sentence {
             Column column = this.columns.get(i);
 
             stringBuilder.append("`").append(column.getName()).append("` ");
-            stringBuilder.append(column.getType()).append("(");
-            stringBuilder.append(column.getSize()).append(")");
+            stringBuilder.append(column.getType());
+            if (column.getSize() != 0)
+                stringBuilder.append("(").append(column.getSize()).append(")");
 
             if (column.canNull())
                 stringBuilder.append(" DEFAULT NULL");
