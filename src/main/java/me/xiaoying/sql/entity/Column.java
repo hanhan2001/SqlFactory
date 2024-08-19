@@ -54,6 +54,8 @@ public class Column {
      * @return String
      */
     public String getFalsehoodName() {
+        if (!this.getName().contains("."))
+            return this.getName();
         return this.getName().split("\\.")[1];
     }
 
