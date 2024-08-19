@@ -47,9 +47,7 @@ public class Record {
      */
     public Object get(String column) {
         for (Column column1 : this.values.keySet()) {
-            if (!column.contains(".") && !column1.getFalsehoodName().replace("`", "").equalsIgnoreCase(column))
-                continue;
-            if (!column1.getName().equals(column))
+            if ((!column.contains(".") && !column1.getFalsehoodName().replace("`", "").equalsIgnoreCase(column)) && !column1.getName().equals(column))
                 continue;
 
             return this.values.get(column1);
