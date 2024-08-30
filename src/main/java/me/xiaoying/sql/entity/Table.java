@@ -1,7 +1,6 @@
 package me.xiaoying.sql.entity;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Table {
     private String name;
