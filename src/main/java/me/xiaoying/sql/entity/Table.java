@@ -38,6 +38,15 @@ public class Table {
     }
 
     /**
+     * get Table's name
+     *
+     * @return Tables's name
+     */
+    public String getName() {
+        return this.name;
+    }
+
+    /**
      * Get records
      *
      * @return ArrayList
