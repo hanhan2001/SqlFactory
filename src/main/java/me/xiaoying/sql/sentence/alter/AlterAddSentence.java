@@ -2,13 +2,18 @@ package me.xiaoying.sql.sentence.alter;
 
 import me.xiaoying.sql.entity.Column;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AlterAddSentence implements AlterSentence {
-    private List<Column> columns;
+    private final List<Column> columns = new ArrayList<>();
+
+    public AlterAddSentence(Column column) {
+        this.columns.add(column);
+    }
 
     public AlterAddSentence(List<Column> columns) {
-        this.columns = columns;
+        this.columns.addAll(columns);
     }
 
     @Override
