@@ -85,7 +85,7 @@ public class MysqlFactory extends SqlFactory {
                     Record record = new Record(table);
                     for (int i = 0; i < metaData.getColumnCount(); i++) {
                         boolean _null = metaData.isNullable(i + 1) != ResultSetMetaData.columnNoNulls;
-                        Column column = new Column(metaData.getTableName(i + 1) + "." + metaData.getColumnName(i + 1), metaData.getColumnTypeName(i + 1), metaData.getColumnDisplaySize(i + 1), _null);
+                        Column column = new Column(metaData.getTableName(i + 1) + "." + metaData.getColumnName(i + 1), metaData.getColumnTypeName(i + 1), metaData.getColumnDisplaySize(i + 1)).setNull(_null);
                         record.set(column, rs.getObject(i + 1));
                     }
                     table.setRecord(record);

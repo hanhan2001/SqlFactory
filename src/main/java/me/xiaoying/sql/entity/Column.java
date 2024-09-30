@@ -8,7 +8,7 @@ public class Column {
     private final String name;
     private final String type;
     private final int size;
-    private final boolean _null;
+    private boolean _null;
 
     /**
      * Constructor of Column
@@ -16,13 +16,11 @@ public class Column {
      * @param name column's name
      * @param type column's type
      * @param size column's size
-     * @param canNull columns can be null or not
      */
-    public Column(String name, String type, int size, boolean canNull) {
+    public Column(String name, String type, int size) {
         this.name = name;
         this.type = type;
         this.size = size;
-        this._null = canNull;
     }
 
     /**
@@ -32,10 +30,9 @@ public class Column {
      * @param name column's name
      * @param type column's type
      * @param size column's size
-     * @param canNull columns can be null or not
      */
-    public Column(Table table, String name, String type, int size, boolean canNull) {
-        this(name, type, size, canNull);
+    public Column(Table table, String name, String type, int size) {
+        this(name, type, size);
         this.table = table;
     }
 
@@ -84,6 +81,17 @@ public class Column {
      */
     public Table getTable() {
         return this.table;
+    }
+
+    /**
+     * Set columns default value can empty or not.
+     *
+     * @param value Boolean
+     * @return Column
+     */
+    public Column setNull(boolean value) {
+        this._null = value;
+        return this;
     }
 
     /**
