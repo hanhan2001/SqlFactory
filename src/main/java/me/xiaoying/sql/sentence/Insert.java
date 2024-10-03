@@ -18,6 +18,21 @@ public class Insert extends Sentence {
         super(table, tables);
     }
 
+    public void insert(String[] values) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < values.length; i++) {
+            stringBuilder.append("\"").append(values[i]).append("\"");
+
+            if (i == values.length - 1)
+                break;
+
+            stringBuilder.append(", ");
+        }
+
+        this.inserts.add(stringBuilder.toString());
+    }
+
     /**
      * Add insert value
      *
@@ -29,9 +44,9 @@ public class Insert extends Sentence {
         for (int i = 0; i < values.length; i++) {
             Object object = values[i];
             if (object instanceof String)
-                stringBuilder.append("\"").append(values[i]).append("\"");
+                stringBuilder.append("\"").append(object).append("\"");
             else
-                stringBuilder.append(values[i]);
+                stringBuilder.append(object);
 
             if (i == values.length - 1)
                 break;
