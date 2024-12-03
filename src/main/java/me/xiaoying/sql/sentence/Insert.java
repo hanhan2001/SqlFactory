@@ -18,7 +18,7 @@ public class Insert extends Sentence {
         super(table, tables);
     }
 
-    public void insert(String[] values) {
+    public Insert insert(String[] values) {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (int i = 0; i < values.length; i++) {
@@ -31,6 +31,7 @@ public class Insert extends Sentence {
         }
 
         this.inserts.add(stringBuilder.toString());
+        return this;
     }
 
     /**
@@ -38,7 +39,7 @@ public class Insert extends Sentence {
      *
      * @param values Object[]
      */
-    public void insert(Object... values) {
+    public Insert insert(Object... values) {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (int i = 0; i < values.length; i++) {
@@ -55,6 +56,7 @@ public class Insert extends Sentence {
         }
 
         this.inserts.add(stringBuilder.toString());
+        return this;
     }
 
     /**
