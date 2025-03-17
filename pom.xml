@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.xiaoying</groupId>
-    <artifactId>SqlFactory</artifactId>
+    <artifactId>sqlfactory</artifactId>
     <version>1.0.0</version>
 
     <properties>
