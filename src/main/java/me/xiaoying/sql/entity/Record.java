@@ -47,7 +47,20 @@ public class Record {
      */
     public Object get(String column) {
         for (Column column1 : this.values.keySet()) {
-            if ((!column.contains(".") && !column1.getFalsehoodName().replace("`", "").equalsIgnoreCase(column)) && !column1.getName().equals(column))
+            if (column1.getName().contains(".")) {
+                String name = column1.getName().replace("`", "");
+
+                if (!column.contains("."))
+                    name = name.split("\\.")[1];
+
+                if (!name.equalsIgnoreCase(column))
+                    continue;
+
+                return this.values.get(column1);
+            }
+
+            String name = column1.getName().replace("`", "");
+            if (!name.equalsIgnoreCase(column))
                 continue;
 
             return this.values.get(column1);
