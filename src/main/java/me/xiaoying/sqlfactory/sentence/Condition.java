@@ -100,7 +100,7 @@ public class Condition {
                     stringBuilder.append(string);
                     break;
                 default:
-                    stringBuilder.append(this.types[i]).append(" ").append(this.value);
+                    stringBuilder.append(this.types[i]).append(" \"").append(this.value).append("\"");
                     break;
             }
 
