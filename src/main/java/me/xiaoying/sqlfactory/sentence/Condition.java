@@ -28,12 +28,7 @@ public class Condition {
 
         this.value = value;
 
-        if (types.length == 0) {
-            this.types = new ConditionType[]{ ConditionType.EQUAL };
-            return;
-        }
-
-        this.types = types;
+        this.types = types == null || types.length == 0 || types[0] == null ? new ConditionType[] { ConditionType.EQUAL } : types;
     }
 
     public Condition condition(String key, Object value, ConditionType... types) {
@@ -71,6 +66,9 @@ public class Condition {
         StringBuilder stringBuilder = new StringBuilder(this.key.toString()).append(" ");
 
         for (int i = 0; i < this.types.length; i++) {
+            if (this.types[i] == null)
+                continue;
+
             switch (this.types[i]) {
                 case BETWEEN_AND:
                     if (!this.value.getClass().isArray() && !(this.value instanceof List<?>)) {
