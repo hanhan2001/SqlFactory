@@ -1,6 +1,8 @@
 package me.xiaoying.sqlfactory.sentence;
 
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import me.xiaoying.sqlfactory.entity.Column;
 
 import java.lang.reflect.Array;
@@ -10,9 +12,13 @@ public class Condition {
     private final Object key;
     private final Object value;
     private final ConditionType[] types;
+
+    @Getter
+    @Setter
+    @Accessors(chain = true)
     private ConditionType connectionType = ConditionType.AND;
 
-    private final Set<Condition> conditions = new HashSet<>();
+    private final List<Condition> conditions = new ArrayList<>();
 
     public Condition(Object key, Object value, ConditionType... types) {
         if (key instanceof String)
@@ -23,7 +29,7 @@ public class Condition {
         this.value = value;
 
         if (types.length == 0) {
-            this.types = new ConditionType[]{ ConditionType.AND };
+            this.types = new ConditionType[]{ ConditionType.EQUAL };
             return;
         }
 
@@ -43,7 +49,21 @@ public class Condition {
         if (this.conditions.isEmpty())
             return this.handle();
 
-        return this.handle();
+        StringBuilder stringBuilder = new StringBuilder("(");
+        stringBuilder.append(this.handle()).append(" ");
+
+        for (int i = 0; i < this.conditions.size(); i++) {
+            stringBuilder.append(this.conditions.get(i).getConnectionType()).append(" ").append(this.conditions.get(i).merge());
+
+            if (i == this.conditions.size() - 1)
+                break;
+
+            stringBuilder.append(" ");
+        }
+
+        stringBuilder.append(")");
+
+        return stringBuilder.toString();
     }
 
     @SuppressWarnings("unchecked")
