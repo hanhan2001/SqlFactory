@@ -1,10 +1,13 @@
 package me.xiaoying.sqlfactory.merge;
 
 import me.xiaoying.sqlfactory.entity.Column;
+import me.xiaoying.sqlfactory.sentence.Condition;
 import me.xiaoying.sqlfactory.sentence.Create;
 import me.xiaoying.sqlfactory.sentence.Insert;
+import me.xiaoying.sqlfactory.sentence.Update;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MysqlMerge {
@@ -108,6 +111,46 @@ public class MysqlMerge {
 
                 stringBuilder.append("\n");
             }
+        }
+
+        return stringBuilder.toString();
+    }
+
+    public static String update(Update update) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < update.getTables().length; i++) {
+            stringBuilder.append("UPDATE ").append(update.getTables()[i]).append(" SET ");
+
+            for (int j = 0; j < update.getValues().size(); j++) {
+                for (String string : update.getValues().get(j).keySet())
+                    stringBuilder.append(Column.formatName(string)).append(" = \"").append(update.getValues().get(j).get(string)).append("\"");
+
+                if (j == update.getValues().size() - 1)
+                    break;
+
+                stringBuilder.append(", ");
+            }
+
+            if (!update.getConditions().isEmpty())
+                stringBuilder.append(" WHERE ");
+
+            // conditions
+            for (int j = 0; j < update.getConditions().size(); j++) {
+                Condition condition = update.getConditions().get(j);
+
+                if (j != 0)
+                    stringBuilder.append(" ").append(condition.getConnectionType()).append(" ");
+
+                stringBuilder.append(condition.merge());
+            }
+
+            stringBuilder.append(";");
+
+            if (i == update.getTables().length - 1)
+                break;
+
+            stringBuilder.append("\n");
         }
 
         return stringBuilder.toString();

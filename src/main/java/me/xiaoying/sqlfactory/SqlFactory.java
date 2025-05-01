@@ -1,10 +1,7 @@
 package me.xiaoying.sqlfactory;
 
 import me.xiaoying.sqlfactory.merge.MysqlMerge;
-import me.xiaoying.sqlfactory.sentence.Create;
-import me.xiaoying.sqlfactory.sentence.Insert;
-import me.xiaoying.sqlfactory.sentence.Sentence;
-import me.xiaoying.sqlfactory.sentence.SentenceManager;
+import me.xiaoying.sqlfactory.sentence.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,6 +22,7 @@ public abstract class SqlFactory {
         // 默认注册 Mysql 的 merge
         SentenceManager.registerMerge(Create.class, SqlFactory.class, MysqlMerge::create);
         SentenceManager.registerMerge(Insert.class, SqlFactory.class, MysqlMerge::insert);
+        SentenceManager.registerMerge(Update.class, SqlFactory.class, MysqlMerge::update);
     }
 
     public SqlFactory(int maxPoolSize) {
