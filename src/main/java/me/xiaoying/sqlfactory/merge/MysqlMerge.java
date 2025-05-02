@@ -1,13 +1,10 @@
 package me.xiaoying.sqlfactory.merge;
 
 import me.xiaoying.sqlfactory.entity.Column;
-import me.xiaoying.sqlfactory.sentence.Condition;
-import me.xiaoying.sqlfactory.sentence.Create;
-import me.xiaoying.sqlfactory.sentence.Insert;
-import me.xiaoying.sqlfactory.sentence.Update;
+import me.xiaoying.sqlfactory.sentence.*;
 
+import java.lang.reflect.Field;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MysqlMerge {
@@ -148,6 +145,53 @@ public class MysqlMerge {
             stringBuilder.append(";");
 
             if (i == update.getTables().length - 1)
+                break;
+
+            stringBuilder.append("\n");
+        }
+
+        return stringBuilder.toString();
+    }
+
+    public static String select(Select select) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        // columns
+        StringBuilder columnBuilder = new StringBuilder();
+        Field[] declaredFields = select.getClazz().getDeclaredFields();
+        for (Field declaredField : declaredFields) {
+            if (declaredField.getAnnotation(me.xiaoying.sqlfactory.annotation.Column.class) == null)
+                continue;
+
+            String name = Column.formatName(declaredField.getName());
+
+            if (columnBuilder.length() != 0)
+                columnBuilder.append(", ");
+
+            columnBuilder.append(name);
+        }
+
+        // conditions
+        StringBuilder conditionBuilder = new StringBuilder();
+        for (int i = 0; i < select.getConditions().size(); i++) {
+            Condition condition = select.getConditions().get(i);
+
+            if (i != 0)
+                conditionBuilder.append(" ").append(condition.getConnectionType()).append(" ");
+
+            conditionBuilder.append(condition.merge());
+        }
+
+        // tables
+        for (int i = 0; i < select.getTables().length; i++) {
+            stringBuilder.append("SELECT ").append(columnBuilder).append(" FROM ").append(select.getTables()[i]);
+
+            if (conditionBuilder.length() != 0)
+                stringBuilder.append(" WHERE ").append(conditionBuilder);
+
+            stringBuilder.append(";");
+
+            if (i == select.getTables().length - 1)
                 break;
 
             stringBuilder.append("\n");
