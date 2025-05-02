@@ -70,7 +70,7 @@ public class Condition {
                 continue;
 
             switch (this.types[i]) {
-                case BETWEEN_AND:
+                case BETWEEN_AND: {
                     if (!this.value.getClass().isArray() && !(this.value instanceof List<?>)) {
                         stringBuilder.append(ConditionType.BETWEEN_AND.toString().replace("{}", "\"" + this.value + "\""));
                         break;
@@ -97,8 +97,43 @@ public class Condition {
 
                     stringBuilder.append(string);
                     break;
+                }
+                case IN:
+                    if (!this.value.getClass().isArray() && !(this.value instanceof List<?>)) {
+                        stringBuilder.append("IN (\"").append(this.value).append("\")");
+                        break;
+                    }
+
+                    stringBuilder.append("IN (");
+                    if (this.value.getClass().isArray())
+                        for (int j = 0; j < Array.getLength(this.value); j++) {
+                            stringBuilder.append("\"").append(Array.get(this.value, j)).append("\"");
+
+                            if (j == Array.getLength(this.value) - 1)
+                                break;
+
+                            stringBuilder.append(", ");
+                        }
+                    else {
+                        List<Object> value1 = (List<Object>) this.value;
+                        for (int j = 0; j < value1.size(); j++) {
+                            stringBuilder.append("\"").append(value1.get(j)).append("\"");
+
+                            if (j == value1.size() - 1)
+                                break;
+
+                            stringBuilder.append(", ");
+                        }
+                    }
+
+                    stringBuilder.append(")");
+                    break;
                 default:
-                    stringBuilder.append(this.types[i]).append(" \"").append(this.value).append("\"");
+                    stringBuilder.append(this.types[i]);
+                    if (i < this.types.length - 1)
+                        break;
+
+                    stringBuilder.append(" \"").append(this.value).append("\"");
                     break;
             }
 
