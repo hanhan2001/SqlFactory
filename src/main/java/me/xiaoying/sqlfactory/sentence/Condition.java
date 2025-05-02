@@ -164,6 +164,7 @@ public class Condition {
         OR("OR"),
         NOT("NOT"),
         NOT_NULL("NOT NULL"),
+        NULL("NULL"),
         IS_NULL("IS NULL"),
         IN("IN"),
         BETWEEN_AND("BETWEEN {} AND {}");
