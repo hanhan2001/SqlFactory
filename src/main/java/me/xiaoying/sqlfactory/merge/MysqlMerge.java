@@ -116,31 +116,36 @@ public class MysqlMerge {
     public static String update(Update update) {
         StringBuilder stringBuilder = new StringBuilder();
 
+        // sets
+        StringBuilder setsBuilder = new StringBuilder();
+        for (int i = 0; i < update.getValues().size(); i++) {
+            for (String string : update.getValues().get(i).keySet())
+                setsBuilder.append(Column.formatName(string)).append(" = \"").append(update.getValues().get(i).get(string)).append("\"");
+
+            if (i == update.getValues().size() - 1)
+                break;
+
+            setsBuilder.append(", ");
+        }
+
+        // conditions
+        StringBuilder conditionBuilder = new StringBuilder();
+        for (int i = 0; i < update.getConditions().size(); i++) {
+            Condition condition = update.getConditions().get(i);
+
+            if (i != 0)
+                conditionBuilder.append(" ").append(condition.getConnectionType()).append(" ");
+
+            conditionBuilder.append(condition.merge());
+        }
+
         for (int i = 0; i < update.getTables().length; i++) {
             stringBuilder.append("UPDATE ").append(update.getTables()[i]).append(" SET ");
 
-            for (int j = 0; j < update.getValues().size(); j++) {
-                for (String string : update.getValues().get(j).keySet())
-                    stringBuilder.append(Column.formatName(string)).append(" = \"").append(update.getValues().get(j).get(string)).append("\"");
+            stringBuilder.append(setsBuilder);
 
-                if (j == update.getValues().size() - 1)
-                    break;
-
-                stringBuilder.append(", ");
-            }
-
-            if (!update.getConditions().isEmpty())
-                stringBuilder.append(" WHERE ");
-
-            // conditions
-            for (int j = 0; j < update.getConditions().size(); j++) {
-                Condition condition = update.getConditions().get(j);
-
-                if (j != 0)
-                    stringBuilder.append(" ").append(condition.getConnectionType()).append(" ");
-
-                stringBuilder.append(condition.merge());
-            }
+            if (conditionBuilder.length() != 0)
+                stringBuilder.append(" WHERE ").append(conditionBuilder);
 
             stringBuilder.append(";");
 
