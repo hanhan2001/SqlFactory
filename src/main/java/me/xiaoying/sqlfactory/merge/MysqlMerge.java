@@ -11,51 +11,50 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MysqlMerge {
     public static String create(Create create) {
+        // columns
+        StringBuilder columnsBuilder = new StringBuilder();
+
+        for (int i = 0; i < create.getTables().length; i++) {
+            Column column = create.getColumns()[i];
+            columnsBuilder.append(column.getName()).append(" ").append(column.getType());
+
+            if (column.getLength() > 0) {
+                columnsBuilder.append("(").append(column.getLength());
+
+                for (String string : column.getParameter())
+                    columnsBuilder.append(", ").append(string);
+
+                columnsBuilder.append(")");
+            }
+            // constraints
+            if (column.isNullable())
+                columnsBuilder.append(" NULL");
+            else
+                columnsBuilder.append(" NOT NULL");
+
+            if (column.isAutoIncrement())
+                columnsBuilder.append(" AUTO_INCREMENT");
+
+            if (column.isUnique())
+                columnsBuilder.append(" UNIQUE");
+
+            if (column.isPrimaryKey())
+                columnsBuilder.append(" PRIMARY KEY");
+
+            if (column.getComment() != null && !column.getComment().isEmpty())
+                columnsBuilder.append(" COMMENT \"").append(column.getComment()).append("\"");
+
+            if (i == create.getColumns().length - 1)
+                break;
+
+            columnsBuilder.append(", ");
+        }
+
         StringBuilder stringBuilder = new StringBuilder();
 
         for (int i = 0; i < create.getTables().length; i++) {
             stringBuilder.append("CREATE TABLE IF NOT EXISTS ");
-            stringBuilder.append("`").append(create.getTables()[i].getName()).append("`(");
-
-            // columns
-            for (int j = 0; j < create.getColumns().length; j++) {
-                Column column = create.getColumns()[j];
-                stringBuilder.append(column.getName()).append(" ").append(column.getType());
-
-                if (column.getLength() > 0) {
-                    stringBuilder.append("(").append(column.getLength());
-
-                    for (int k = 0; k < column.getParameter().length; k++)
-                        stringBuilder.append(", ").append(column.getParameter()[k]);
-
-                    stringBuilder.append(")");
-                }
-
-                // constraints
-                if (column.isNullable())
-                    stringBuilder.append(" NULL");
-                else
-                    stringBuilder.append(" NOT NULL");
-
-                if (column.isAutoIncrement())
-                    stringBuilder.append(" AUTO_INCREMENT");
-
-                if (column.isUnique())
-                    stringBuilder.append(" UNIQUE");
-
-                if (column.isPrimaryKey())
-                    stringBuilder.append(" PRIMARY KEY");
-
-                if (column.getComment() != null && !column.getComment().isEmpty())
-                    stringBuilder.append(" COMMENT \"").append(column.getComment()).append("\"");
-
-                if (j == create.getColumns().length - 1)
-                    break;
-
-                stringBuilder.append(", ");
-            }
-
-            stringBuilder.append(")");
+            stringBuilder.append("`").append(create.getTables()[i].getName()).append("`(").append(columnsBuilder).append(")");
 
             if (create.getTables().length > 0 && create.getTables()[0].getComment() != null && !create.getTables()[0].getComment().isEmpty())
                 stringBuilder.append(" COMMENT \"").append(create.getTables()[0].getComment()).append("\"");
