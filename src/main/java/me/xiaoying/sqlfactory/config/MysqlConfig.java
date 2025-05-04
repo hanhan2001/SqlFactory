@@ -6,7 +6,6 @@ import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 @Getter
-@Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MysqlConfig extends Config {
     private final String username;
