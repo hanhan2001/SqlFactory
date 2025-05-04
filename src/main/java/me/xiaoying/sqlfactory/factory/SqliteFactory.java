@@ -1,23 +1,23 @@
 package me.xiaoying.sqlfactory.factory;
 
 import me.xiaoying.sqlfactory.SqlFactory;
+import me.xiaoying.sqlfactory.config.SqliteConfig;
 import org.sqlite.JDBC;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class SqliteFactory extends SqlFactory {
-    private final File file;
+    private final SqliteConfig config;
 
-    public SqliteFactory(File file, int maxPoolSize) {
-        super(maxPoolSize);
+    public SqliteFactory(SqliteConfig config) {
+        super(config.getMaxPoolSize(), config.getConnectionTimeout());
 
-        if (file == null)
+        this.config = config;
+
+        if (this.config.getFile() == null)
             throw new IllegalArgumentException("file is null");
-
-        this.file = file;
 
         try {
             DriverManager.registerDriver(new JDBC());
@@ -29,7 +29,7 @@ public class SqliteFactory extends SqlFactory {
     @Override
     protected Connection createConnection() {
         try {
-            return DriverManager.getConnection("jdbc:sqlite:" + this.file.getAbsolutePath());
+            return DriverManager.getConnection("jdbc:sqlite:" + this.config.getFile().getAbsolutePath());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
