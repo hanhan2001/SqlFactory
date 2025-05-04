@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("com.github.johnrengelman.shadow").version("8.1.1")
 }
 
 group = "me.xiaoying.sqlfactory"
@@ -10,15 +11,15 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-repositories {
-    // 从本地仓库中寻找依赖文件
-    // 其实就是从中央仓库或别的仓库中下载以来后会存储到本地
-    mavenLocal()
-    // 从 maven 中央仓库中寻找依赖文件
-    mavenCentral()
+configurations {
+    create("sqlite")
+    create("mysql")
+    create("postgresql")
+}
 
-    // 事实上 maven 允许搭建个人仓库，通常的格式是 maven("仓库地址")
-    // 不过在 SqlFactory 的开发过程中理论上用不上这个功能
+repositories {
+    mavenLocal()
+    mavenCentral()
 }
 
 // 依赖文件
@@ -28,7 +29,37 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.38")
 
     // Sqlite
+    "sqlite" (group = "org.xerial", name = "sqlite-jdbc", version = "3.49.1.0")
     implementation("org.xerial:sqlite-jdbc:3.49.1.0")
+
     // Mysql
+    "mysql" (group = "com.mysql", name = "mysql-connector-j", version = "9.2.0")
     implementation("com.mysql:mysql-connector-j:9.2.0")
+
+    // PostgreSql
+    "postgresql" (group = "org.postgresql", name = "postgresql", version = "42.7.5")
+    implementation("org.postgresql:postgresql:42.7.5")
+}
+
+// 根据不同的依赖分别打包
+listOf("mysql", "sqlite", "postgresql").forEach {variable ->
+    tasks.register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>(variable) {
+        group = "build"
+        configurations = listOf(project.configurations[variable])
+        archiveClassifier.set(variable)
+        archiveFileName.set("sqlfactory-${variable}-${project.version}.jar")
+        from(sourceSets.main.get().output)
+    }
+}
+
+tasks.jar {
+    archiveFileName.set("sqlfactory-${project.version}.jar")
+}
+
+tasks.shadowJar {
+    archiveFileName.set("sqlfactory-all-${project.version}.jar")
+}
+
+tasks.build {
+    dependsOn("sqlite", "mysql", "postgresql", tasks.jar, tasks.shadowJar)
 }
