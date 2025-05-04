@@ -1,11 +1,15 @@
 package me.xiaoying.sqlfactory;
 
+import me.xiaoying.sqlfactory.annotation.Column;
 import me.xiaoying.sqlfactory.merge.MysqlMerge;
 import me.xiaoying.sqlfactory.sentence.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -67,23 +71,88 @@ public abstract class SqlFactory {
         this.availableConnections.offer(connection);
     }
 
-    public void run(String... sentence) {
+    public Object run(String... sentence) {
         try {
             Connection connection = this.getConnection();
 
             for (String string : sentence) {
                 PreparedStatement preparedStatement = connection.prepareStatement(string);
                 preparedStatement.execute();
+                preparedStatement.close();
             }
 
             connection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+        return null;
     }
 
-    public void run(Sentence... sentence) {
-        for (Sentence s : sentence) this.run(s.merge());
+    public Object run(Sentence... sentence) {
+        for (Sentence sen : sentence) {
+            if (!(sen instanceof Select)) {
+                this.run(sen.toString());
+                continue;
+            }
+
+            Select select = (Select) sen;
+
+            if (select.getConstructor() == null)
+                continue;
+
+            Object[] parameters = new Object[select.getParameters().size()];
+            Map<String, Object> values = new HashMap<>();
+
+            try {
+                Connection connection = this.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sen.merge());
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+
+                while (resultSet.next()) {
+                    for (int i = 0; i < resultSetMetaData.getColumnCount(); i++) {
+                        String name = resultSetMetaData.getColumnName(i + 1);
+
+                        if (!select.getParameters().containsKey(name)) {
+                            values.put(name, resultSet.getObject(i + 1));
+                            continue;
+                        }
+
+                        parameters[select.getParameters().get(name)] = resultSet.getObject(i + 1);
+                    }
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+            Object object;
+
+            try {
+                select.getConstructor().setAccessible(true);
+                object = select.getConstructor().newInstance(parameters);
+
+                for (Field declaredField : select.getClazz().getDeclaredFields()) {
+                    declaredField.setAccessible(true);
+
+                    if (declaredField.getAnnotation(Column.class) == null)
+                        continue;
+
+                    if (Modifier.isFinal(declaredField.getModifiers()))
+                        continue;
+
+                    declaredField.set(object, values.get(declaredField.getName()));
+
+                }
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                return null;
+            }
+
+            return object;
+        }
+
+        return null;
     }
 
     protected abstract Connection createConnection();

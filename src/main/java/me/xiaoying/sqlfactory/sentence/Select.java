@@ -8,7 +8,9 @@ import me.xiaoying.sqlfactory.annotation.Table;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 public class Select extends Sentence {
@@ -18,6 +20,8 @@ public class Select extends Sentence {
     private final List<Condition> conditions = new ArrayList<>();
 
     private Constructor<?> constructor = null;
+//    private final List<String> parameters = new ArrayList<>();
+    private final Map<String, Integer> parameters = new HashMap<>();
 
     public Select(Object object) {
         this(object, null);
@@ -30,8 +34,6 @@ public class Select extends Sentence {
     public Select(Object object, Class<? extends SqlFactory> factory) {
         this(object.getClass(), factory);
 
-        List<String> parameter = new ArrayList<>();
-
         for (Field declaredField : this.clazz.getDeclaredFields()) {
             if (declaredField.getAnnotation(Column.class) == null)
                 continue;
@@ -39,7 +41,7 @@ public class Select extends Sentence {
             if (!Modifier.isFinal(declaredField.getModifiers()))
                 continue;
 
-            parameter.add(declaredField.getName());
+            this.parameters.put(declaredField.getName(), this.parameters.size());
 
             declaredField.setAccessible(true);
             try {
@@ -58,13 +60,13 @@ public class Select extends Sentence {
                 if ((param = constructor.getParameters()[i].getAnnotation(Param.class)) == null)
                     continue;
 
-                if (!parameter.contains(param.value()))
+                if (!this.parameters.containsKey(param.value()))
                     continue flag;
 
                 flagParameter.add(param.value());
             }
 
-            if (flagParameter.size() != parameter.size())
+            if (flagParameter.size() != this.parameters.size())
                 continue;
 
             if (this.constructor == null) {
