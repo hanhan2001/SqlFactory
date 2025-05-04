@@ -2,6 +2,7 @@ package me.xiaoying.sqlfactory.factory;
 
 import com.mysql.cj.jdbc.Driver;
 import me.xiaoying.sqlfactory.SqlFactory;
+import me.xiaoying.sqlfactory.config.MysqlConfig;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,15 +16,15 @@ public class MysqlFactory extends SqlFactory {
     private final String username;
     private final String password;
 
-    public MysqlFactory(String host, int port, String database, String username, String password, int maxPoolSize) {
-        super(maxPoolSize);
+    public MysqlFactory(MysqlConfig config) {
+        super(config.getMaxPoolSize(), config.getConnectionTimeout());
 
-        this.host = host;
-        this.port = port;
-        this.database = database;
+        this.host = config.getHost();
+        this.port = config.getPort();
+        this.database = config.getDatabase();
 
-        this.username = username;
-        this.password = password;
+        this.username = config.getUsername();
+        this.password = config.getPassword();
 
         try {
             DriverManager.registerDriver(new Driver());
