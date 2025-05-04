@@ -8,7 +8,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -17,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class SqlFactory {
     private final int maxPoolSize;
-    private final int connectionTimeout;
+    private final long connectionTimeout;
 
     private final BlockingQueue<Connection> availableConnections;
     private final AtomicInteger activeConnections = new AtomicInteger(0);
@@ -34,7 +36,7 @@ public abstract class SqlFactory {
         this(maxPoolSize, 2000);
     }
 
-    public SqlFactory(int maxPoolSize, int connectionTimeout) {
+    public SqlFactory(int maxPoolSize, long connectionTimeout) {
         this.maxPoolSize = maxPoolSize;
         this.connectionTimeout = connectionTimeout;
 
@@ -71,7 +73,7 @@ public abstract class SqlFactory {
         this.availableConnections.offer(connection);
     }
 
-    public Object run(String... sentence) {
+    public void run(String... sentence) {
         try {
             Connection connection = this.getConnection();
 
@@ -85,11 +87,11 @@ public abstract class SqlFactory {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        return null;
     }
 
-    public Object run(Sentence... sentence) {
+    public List<Object> run(Sentence... sentence) {
+        List<Object> objects = new ArrayList<>();
+
         for (Sentence sen : sentence) {
             if (!(sen instanceof Select)) {
                 this.run(sen.toString());
@@ -143,16 +145,15 @@ public abstract class SqlFactory {
                         continue;
 
                     declaredField.set(object, values.get(declaredField.getName()));
-
                 }
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 return null;
             }
 
-            return object;
+            objects.add(object);
         }
 
-        return null;
+        return objects;
     }
 
     protected abstract Connection createConnection();
