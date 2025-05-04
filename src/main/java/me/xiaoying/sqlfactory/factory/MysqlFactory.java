@@ -9,22 +9,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class MysqlFactory extends SqlFactory {
-    private final String host;
-    private final int port;
-    private final String database;
-
-    private final String username;
-    private final String password;
+    private final MysqlConfig config;
 
     public MysqlFactory(MysqlConfig config) {
         super(config.getMaxPoolSize(), config.getConnectionTimeout());
 
-        this.host = config.getHost();
-        this.port = config.getPort();
-        this.database = config.getDatabase();
-
-        this.username = config.getUsername();
-        this.password = config.getPassword();
+        this.config = config;
 
         try {
             DriverManager.registerDriver(new Driver());
@@ -36,7 +26,7 @@ public class MysqlFactory extends SqlFactory {
     @Override
     protected Connection createConnection() {
         try {
-            return DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database + "?allowMultiQueries=true", this.username, this.password);
+            return DriverManager.getConnection("jdbc:mysql://" + this.config.getHost() + ":" + this.config.getPort() + "/" + this.config.getDatabase() + "?allowMultiQueries=true", this.config.getUsername(), this.config.getPassword());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
