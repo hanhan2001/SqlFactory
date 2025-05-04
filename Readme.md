@@ -6,6 +6,12 @@
 
 
 
+移除代码已经实现，缺少 Sqlite 和 PostgreSql 的语句拼接以及 SELECT 语句的类型强转。
+
+有时间将重写 Readmd.md
+
+
+
 ## Use
 
 If you want use SqlFactory, you need download jar in releases or build this repository.
