@@ -4,6 +4,8 @@ import me.xiaoying.sqlfactory.entity.Column;
 import me.xiaoying.sqlfactory.sentence.*;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -73,40 +75,48 @@ public class MysqlMerge {
         if (insert.getValues().isEmpty())
             return "";
 
+        // columns and values
+        List<String> suffix = new ArrayList<>();
+
+        StringBuilder columnBuilder = new StringBuilder();
+        StringBuilder valuesBuilder = new StringBuilder();
+
+        for (int i = 0; i < insert.getValues().size(); i++) {
+            Map<String, Object> stringObjectMap = insert.getValues().get(i);
+
+            columnBuilder.append("(");
+            valuesBuilder.append("(");
+
+            AtomicInteger index = new AtomicInteger(0);
+            stringObjectMap.forEach((column, value) -> {
+                columnBuilder.append(Column.formatName(column));
+                valuesBuilder.append("\"").append(value).append("\"");
+
+                if (index.get() == stringObjectMap.size() - 1)
+                    return;
+
+                columnBuilder.append(", ");
+                valuesBuilder.append(", ");
+
+                index.incrementAndGet();
+            });
+
+            columnBuilder.append(")");
+            valuesBuilder.append(")");
+
+            suffix.add(columnBuilder + " VALUES " + valuesBuilder + ";");
+
+            columnBuilder.delete(0, columnBuilder.length());
+            valuesBuilder.delete(0, valuesBuilder.length());
+        }
+
         StringBuilder stringBuilder = new StringBuilder();
-
         for (int i = 0; i < insert.getTables().length; i++) {
-            for (int j = 0; j < insert.getValues().size(); j++) {
-                StringBuilder prefixBuilder = new StringBuilder("INSERT INTO `").append(insert.getTables()[i]).append("`");
+            for (String s : suffix) {
+                if (stringBuilder.length() != 0)
+                    stringBuilder.append("\n");
 
-                StringBuilder columnBuilder = new StringBuilder("(");
-                StringBuilder valuesBuilder = new StringBuilder("(");
-
-                Map<String, Object> stringObjectMap = insert.getValues().get(j);
-
-                AtomicInteger index = new AtomicInteger(0);
-                stringObjectMap.forEach((column, value) -> {
-                    columnBuilder.append(Column.formatName(column));
-                    valuesBuilder.append("\"").append(value).append("\"");
-
-                    if (index.get() == stringObjectMap.size() - 1)
-                        return;
-
-                    columnBuilder.append(", ");
-                    valuesBuilder.append(", ");
-
-                    index.incrementAndGet();
-                });
-
-                columnBuilder.append(")");
-                valuesBuilder.append(")");
-
-                stringBuilder.append(prefixBuilder.append(columnBuilder).append(" VALUES ").append(valuesBuilder)).append(";");
-
-                if (j == stringObjectMap.size() - 1)
-                    break;
-
-                stringBuilder.append("\n");
+                stringBuilder.append("INSERT INTO `").append(insert.getTables()[i]).append("`").append(s);
             }
         }
 
