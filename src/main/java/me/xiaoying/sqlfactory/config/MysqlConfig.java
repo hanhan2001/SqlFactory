@@ -2,7 +2,6 @@ package me.xiaoying.sqlfactory.config;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 
 @Getter
