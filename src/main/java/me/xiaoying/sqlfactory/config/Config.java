@@ -12,4 +12,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public abstract class Config {
     private int maxPoolSize = 10;
+
+    private long connectionTimeout = 2000;
 }
