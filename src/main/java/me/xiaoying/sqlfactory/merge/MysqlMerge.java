@@ -14,7 +14,7 @@ public class MysqlMerge {
         // columns
         StringBuilder columnsBuilder = new StringBuilder();
 
-        for (int i = 0; i < create.getTables().length; i++) {
+        for (int i = 0; i < create.getColumns().length; i++) {
             Column column = create.getColumns()[i];
             columnsBuilder.append(column.getName()).append(" ").append(column.getType());
 
@@ -26,6 +26,7 @@ public class MysqlMerge {
 
                 columnsBuilder.append(")");
             }
+
             // constraints
             if (column.isNullable())
                 columnsBuilder.append(" NULL");
