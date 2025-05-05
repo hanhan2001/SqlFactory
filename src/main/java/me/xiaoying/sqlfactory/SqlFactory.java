@@ -6,7 +6,6 @@ import me.xiaoying.sqlfactory.sentence.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,69 +99,55 @@ public abstract class SqlFactory {
 
             Select select = (Select) sen;
 
-            Map<Integer, Object[]> parameters = new HashMap<>();
-            Map<Integer, Map<String, Object>> values = new HashMap<>();
-
             try {
-                Connection connection = this.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(sen.merge());
+                PreparedStatement preparedStatement = this.getConnection().prepareStatement(select.merge());
                 ResultSet resultSet = preparedStatement.executeQuery();
+                ResultSetMetaData metaData = resultSet.getMetaData();
 
-                ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-
-                int index = 0;
                 while (resultSet.next()) {
-                    Map<String, Object> map;
+                    Object[] parameters = new Object[select.getParameters().size()];
+                    Map<String, Object> fields = new HashMap<>();
 
-                    if ((map = values.get(index)) == null)
-                        map = new HashMap<>();
+                    for (int i = 0; i < metaData.getColumnCount(); i++) {
+                        String columnName = metaData.getColumnName(i + 1);
 
-                    parameters.put(index, new Object[select.getParameters().size()]);
-
-                    for (int i = 0; i < resultSetMetaData.getColumnCount(); i++) {
-                        String name = resultSetMetaData.getColumnName(i + 1);
-
-                        if (!select.getParameters().containsKey(name)) {
-                            map.put(name, resultSet.getObject(i + 1));
+                        if (select.getParameters().containsKey(columnName)) {
+                            parameters[i] = resultSet.getObject(columnName);
                             continue;
                         }
 
-                        parameters.get(index)[select.getParameters().get(name)] = resultSet.getObject(i + 1);
+                        if (select.getConstructor() != null) {
+                            if (select.getConstructor().getParameters()[i].getType().isPrimitive())
+                                parameters[i] = 0;
+                            else
+                                parameters[i] = null;
+                        }
+
+                        fields.put(columnName, resultSet.getObject(columnName));
                     }
 
-                    values.put(index++, map);
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+                    Object object;
 
-            for (int i = 0; i < values.size(); i++) {
-                Object object = null;
-
-                try {
                     if (select.getConstructor() == null)
                         object = select.getClazz().newInstance();
-                    else {
-                        select.getConstructor().setAccessible(true);
-                        object = select.getConstructor().newInstance(parameters.get(i));
-                    }
+                    else
+                        object = select.getConstructor().newInstance(parameters);
 
                     for (Field declaredField : select.getClazz().getDeclaredFields()) {
-                        declaredField.setAccessible(true);
-
                         if (declaredField.getAnnotation(Column.class) == null)
                             continue;
 
-                        if (Modifier.isFinal(declaredField.getModifiers()))
+                        if (select.getParameters().containsKey(declaredField.getName()))
                             continue;
 
-                        declaredField.set(object, values.get(i).get(declaredField.getName()));
+                        declaredField.setAccessible(true);
+                        declaredField.set(object, fields.get(declaredField.getName()));
                     }
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
 
-                objects.add(object);
+                    objects.add(object);
+                }
+            } catch (SQLException | InstantiationException | IllegalAccessException | InvocationTargetException e){
+                throw new RuntimeException(e);
             }
         }
 

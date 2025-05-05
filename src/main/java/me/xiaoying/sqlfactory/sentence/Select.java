@@ -2,11 +2,12 @@ package me.xiaoying.sqlfactory.sentence;
 
 import lombok.Getter;
 import me.xiaoying.sqlfactory.SqlFactory;
-import me.xiaoying.sqlfactory.annotation.Column;
-import me.xiaoying.sqlfactory.annotation.Param;
-import me.xiaoying.sqlfactory.annotation.Table;
+import me.xiaoying.sqlfactory.annotation.*;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,12 +15,12 @@ import java.util.Map;
 
 @Getter
 public class Select extends Sentence {
-    private String[] tables;
+    private final String[] tables;
 
     private final Class<?> clazz;
     private final List<Condition> conditions = new ArrayList<>();
 
-    private Constructor<?> constructor = null;
+    private Constructor<?> constructor;
     private final Map<String, Integer> parameters = new HashMap<>();
 
     public Select(Object object) {
@@ -33,11 +34,11 @@ public class Select extends Sentence {
     public Select(Object object, Class<? extends SqlFactory> factory) {
         this(object.getClass(), factory);
 
-        for (Field declaredField : this.clazz.getDeclaredFields()) {
-            if (declaredField.getAnnotation(Column.class) == null)
+        for (Field declaredField : object.getClass().getDeclaredFields()) {
+            if (!Modifier.isFinal(declaredField.getModifiers()) && declaredField.getAnnotation(AutoCondition.class) == null)
                 continue;
 
-            if (!Modifier.isFinal(declaredField.getModifiers()))
+            if (declaredField.getAnnotation(Column.class) == null)
                 continue;
 
             declaredField.setAccessible(true);
@@ -52,47 +53,41 @@ public class Select extends Sentence {
     public Select(Class<?> clazz, Class<? extends SqlFactory> factory) {
         super(factory);
 
-        if (clazz.getAnnotation(Table.class) == null)
+        Table table;
+        if ((table = clazz.getAnnotation(Table.class)) == null)
             throw new RuntimeException(new IllegalArgumentException("Missing @Table annotation"));
 
+        this.tables = table.name();
         this.clazz = clazz;
-        this.tables = this.clazz.getAnnotation(Table.class).name();
 
-        for (Field declaredField : this.clazz.getDeclaredFields()) {
-            if (declaredField.getAnnotation(Column.class) == null)
-                continue;
+        for (Constructor<?> declaredConstructor : this.clazz.getDeclaredConstructors()) {
+            if (declaredConstructor.getAnnotation(AutoConstructor.class) != null) {
+                declaredConstructor.setAccessible(true);
+                this.constructor = declaredConstructor;
+                break;
+            }
 
-            if (!Modifier.isFinal(declaredField.getModifiers()))
-                continue;
+            boolean hasParam = false;
 
-            this.parameters.put(declaredField.getName(), this.parameters.size());
-        }
+            for (int i = 0; i < declaredConstructor.getParameters().length; i++) {
+                Parameter parameter = declaredConstructor.getParameters()[i];
 
-        // constructor
-        flag: for (Constructor<?> constructor : this.clazz.getConstructors()) {
-            List<String> flagParameter = new ArrayList<>();
-
-            for (int i = 0; i < constructor.getParameters().length; i++) {
-                Param param;
-                if ((param = constructor.getParameters()[i].getAnnotation(Param.class)) == null)
+                if (parameter.getAnnotation(Param.class) == null)
                     continue;
 
-                if (!this.parameters.containsKey(param.value()))
-                    continue flag;
+                if (!hasParam)
+                    hasParam= true;
 
-                flagParameter.add(param.value());
+                this.parameters.put(parameter.getName(), i);
             }
 
-            if (flagParameter.size() != this.parameters.size())
-                continue;
-
-            if (this.constructor == null) {
-                this.constructor = constructor;
+            if (!hasParam) {
+                this.parameters.clear();
                 continue;
             }
 
-            if (this.constructor.getParameterCount() > constructor.getParameterCount())
-                this.constructor = constructor;
+            declaredConstructor.setAccessible(true);
+            this.constructor = declaredConstructor;
         }
     }
 
