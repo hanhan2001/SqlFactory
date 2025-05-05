@@ -63,7 +63,7 @@ public class Insert extends Sentence {
                 }
             }
 
-            this.values.put(i, map);
+            this.values.put(this.values.size(), map);
         }
         return this;
     }
