@@ -80,10 +80,9 @@ final class SConnection implements Connection {
     public void close(boolean really) throws SQLException {
         this.lastAccess = new Date();
 
-        if (really) {
+        if (really)
             this.originConnection.close();
-            System.out.println(24);
-        } else
+        else
             this.factory.releaseConnection(this);
     }
 
