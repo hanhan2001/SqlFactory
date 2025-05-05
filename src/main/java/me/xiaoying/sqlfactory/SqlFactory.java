@@ -100,11 +100,8 @@ public abstract class SqlFactory {
 
             Select select = (Select) sen;
 
-            if (select.getConstructor() == null)
-                continue;
-
-            Object[] parameters = new Object[select.getParameters().size()];
-            Map<String, Object> values = new HashMap<>();
+            Map<Integer, Object[]> parameters = new HashMap<>();
+            Map<Integer, Map<String, Object>> values = new HashMap<>();
 
             try {
                 Connection connection = this.getConnection();
@@ -113,44 +110,60 @@ public abstract class SqlFactory {
 
                 ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
 
+                int index = 0;
                 while (resultSet.next()) {
+                    Map<String, Object> map;
+
+                    if ((map = values.get(index)) == null)
+                        map = new HashMap<>();
+
+                    parameters.put(index, new Object[select.getParameters().size()]);
+
                     for (int i = 0; i < resultSetMetaData.getColumnCount(); i++) {
                         String name = resultSetMetaData.getColumnName(i + 1);
 
                         if (!select.getParameters().containsKey(name)) {
-                            values.put(name, resultSet.getObject(i + 1));
+                            map.put(name, resultSet.getObject(i + 1));
                             continue;
                         }
 
-                        parameters[select.getParameters().get(name)] = resultSet.getObject(i + 1);
+                        parameters.get(index)[select.getParameters().get(name)] = resultSet.getObject(i + 1);
                     }
+
+                    values.put(index++, map);
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
 
-            Object object;
+            for (int i = 0; i < values.size(); i++) {
+                Object object = null;
 
-            try {
-                select.getConstructor().setAccessible(true);
-                object = select.getConstructor().newInstance(parameters);
+                try {
+                    if (select.getConstructor() == null)
+                        object = select.getClazz().newInstance();
+                    else {
+                        select.getConstructor().setAccessible(true);
+                        object = select.getConstructor().newInstance(parameters.get(i));
+                    }
 
-                for (Field declaredField : select.getClazz().getDeclaredFields()) {
-                    declaredField.setAccessible(true);
+                    for (Field declaredField : select.getClazz().getDeclaredFields()) {
+                        declaredField.setAccessible(true);
 
-                    if (declaredField.getAnnotation(Column.class) == null)
-                        continue;
+                        if (declaredField.getAnnotation(Column.class) == null)
+                            continue;
 
-                    if (Modifier.isFinal(declaredField.getModifiers()))
-                        continue;
+                        if (Modifier.isFinal(declaredField.getModifiers()))
+                            continue;
 
-                    declaredField.set(object, values.get(declaredField.getName()));
+                        declaredField.set(object, values.get(i).get(declaredField.getName()));
+                    }
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
                 }
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                return null;
-            }
 
-            objects.add(object);
+                objects.add(object);
+            }
         }
 
         return objects;
