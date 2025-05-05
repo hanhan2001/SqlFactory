@@ -1,4 +1,7 @@
 plugins {
+    `maven-publish`
+    `java-library`
+
     id("java")
     id("com.github.johnrengelman.shadow").version("8.1.1")
 }
@@ -39,6 +42,21 @@ dependencies {
     // PostgreSql
     "postgresql" (group = "org.postgresql", name = "postgresql", version = "42.7.5")
     implementation("org.postgresql:postgresql:42.7.5")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from (components["java"])
+            groupId = "me.xiaoying"
+            artifactId = "sqlfactory"
+            version = project.version.toString()
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
 }
 
 // 根据不同的依赖分别打包
