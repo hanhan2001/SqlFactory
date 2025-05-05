@@ -7,6 +7,7 @@ import java.util.Date;
 @Getter
 public enum ColumnType {
     VARCHAR("varchar"),
+    LONGTEXT("longtext"),
     INT("int"),
     BIGINT("bigint"),
     FLOAT("float"),
