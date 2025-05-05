@@ -20,7 +20,6 @@ public class Select extends Sentence {
     private final List<Condition> conditions = new ArrayList<>();
 
     private Constructor<?> constructor = null;
-//    private final List<String> parameters = new ArrayList<>();
     private final Map<String, Integer> parameters = new HashMap<>();
 
     public Select(Object object) {
@@ -41,14 +40,32 @@ public class Select extends Sentence {
             if (!Modifier.isFinal(declaredField.getModifiers()))
                 continue;
 
-            this.parameters.put(declaredField.getName(), this.parameters.size());
-
             declaredField.setAccessible(true);
             try {
                 this.conditions.add(new Condition(declaredField.getName(), declaredField.get(object)));
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    public Select(Class<?> clazz, Class<? extends SqlFactory> factory) {
+        super(factory);
+
+        if (clazz.getAnnotation(Table.class) == null)
+            throw new RuntimeException(new IllegalArgumentException("Missing @Table annotation"));
+
+        this.clazz = clazz;
+        this.tables = this.clazz.getAnnotation(Table.class).name();
+
+        for (Field declaredField : this.clazz.getDeclaredFields()) {
+            if (declaredField.getAnnotation(Column.class) == null)
+                continue;
+
+            if (!Modifier.isFinal(declaredField.getModifiers()))
+                continue;
+
+            this.parameters.put(declaredField.getName(), this.parameters.size());
         }
 
         // constructor
@@ -77,16 +94,6 @@ public class Select extends Sentence {
             if (this.constructor.getParameterCount() > constructor.getParameterCount())
                 this.constructor = constructor;
         }
-    }
-
-    public Select(Class<?> clazz, Class<? extends SqlFactory> factory) {
-        super(factory);
-
-        if (clazz.getAnnotation(Table.class) == null)
-            throw new RuntimeException(new IllegalArgumentException("Missing @Table annotation"));
-
-        this.clazz = clazz;
-        this.tables = this.clazz.getAnnotation(Table.class).name();
     }
 
     @Override
