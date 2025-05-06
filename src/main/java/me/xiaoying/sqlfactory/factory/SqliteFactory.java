@@ -10,6 +10,7 @@ import java.sql.SQLException;
 
 public class SqliteFactory extends SqlFactory {
     private final SqliteConfig config;
+    private Connection connection;
 
     public SqliteFactory(SqliteConfig config) {
         super(config.getMaxPoolSize(), config.getConnectionTimeout());
@@ -24,6 +25,20 @@ public class SqliteFactory extends SqlFactory {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Sqlite 数据库不支持多连接，所以需要手动实现单连接
+     *
+     * @return Connection
+     * @throws SQLException SQLException
+     */
+    @Override
+    public Connection getConnection() throws SQLException {
+        if (this.connection == null || this.connection.isClosed())
+            this.connection = this.createConnection();
+
+        return this.connection;
     }
 
     @Override
