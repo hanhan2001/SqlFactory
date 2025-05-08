@@ -54,8 +54,8 @@ public class Update extends Sentence {
         return this.where(new Where(key, value, types));
     }
 
-    public Update where(Where condition) {
-        this.wheres.add(condition);
+    public Update where(Where where) {
+        this.wheres.add(where);
         return this;
     }
 

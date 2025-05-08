@@ -100,8 +100,8 @@ public class Select extends Sentence {
         return this.where(new Where(key, value, types));
     }
 
-    public Select where(Where condition) {
-        this.wheres.add(condition);
+    public Select where(Where where) {
+        this.wheres.add(where);
         return this;
     }
 
