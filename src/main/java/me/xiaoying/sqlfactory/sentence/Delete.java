@@ -54,6 +54,19 @@ public class Delete extends Sentence{
         this.tables = table.name();
     }
 
+    public Delete where(String key, Object value) {
+        return this.where(key, value, (Where.WhereType) null);
+    }
+
+    public Delete where(String key, Object value, Where.WhereType... types) {
+        return this.where(new Where(key, value, types));
+    }
+
+    public Delete where(Where where) {
+        this.wheres.add(where);
+        return this;
+    }
+
     @Override
     public String merge() {
         return SentenceManager.getMerge(this, this.factory).merge(this);
