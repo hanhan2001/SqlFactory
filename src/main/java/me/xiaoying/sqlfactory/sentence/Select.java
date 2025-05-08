@@ -93,10 +93,10 @@ public class Select extends Sentence {
     }
 
     public Select where(String key, Object value) {
-        return this.where(key, value, (Where.ConditionType) null);
+        return this.where(key, value, (Where.WhereType) null);
     }
 
-    public Select where(String key, Object value, Where.ConditionType... types) {
+    public Select where(String key, Object value, Where.WhereType... types) {
         return this.where(new Where(key, value, types));
     }
 

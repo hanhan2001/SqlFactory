@@ -11,16 +11,16 @@ import java.util.*;
 public class Where {
     private final Object key;
     private final Object value;
-    private final ConditionType[] types;
+    private final WhereType[] types;
 
     @Getter
     @Setter
     @Accessors(chain = true)
-    private ConditionType connectionType = ConditionType.AND;
+    private WhereType connectionType = WhereType.AND;
 
     private final List<Where> conditions = new ArrayList<>();
 
-    public Where(Object key, Object value, ConditionType... types) {
+    public Where(Object key, Object value, WhereType... types) {
         if (key instanceof String)
             this.key = Column.formatName((String) key);
         else
@@ -28,10 +28,10 @@ public class Where {
 
         this.value = value;
 
-        this.types = types == null || types.length == 0 || types[0] == null ? new ConditionType[] { ConditionType.EQUAL } : types;
+        this.types = types == null || types.length == 0 || types[0] == null ? new WhereType[] { WhereType.EQUAL } : types;
     }
 
-    public Where condition(String key, Object value, ConditionType... types) {
+    public Where condition(String key, Object value, WhereType... types) {
         return this.condition(new Where(key, value, types));
     }
 
@@ -72,7 +72,7 @@ public class Where {
             switch (this.types[i]) {
                 case BETWEEN_AND: {
                     if (!this.value.getClass().isArray() && !(this.value instanceof List<?>)) {
-                        stringBuilder.append(ConditionType.BETWEEN_AND.toString().replace("{}", "\"" + this.value + "\""));
+                        stringBuilder.append(WhereType.BETWEEN_AND.toString().replace("{}", "\"" + this.value + "\""));
                         break;
                     }
 
@@ -86,7 +86,7 @@ public class Where {
                         objects = (List<Object>) this.value;
 
 
-                    String string = ConditionType.BETWEEN_AND.toString();
+                    String string = WhereType.BETWEEN_AND.toString();
 
                     if (objects.size() == 1)
                         string = string.replace("{}", "\"" + objects.get(0).toString() + "\"");
@@ -152,7 +152,7 @@ public class Where {
     }
 
     @Getter
-    public enum ConditionType {
+    public enum WhereType {
         EQUAL("="),
         NOT_EQUAL("<>"),
         GREATER_EQUAL(">="),
@@ -171,7 +171,7 @@ public class Where {
 
         private final String value;
 
-        ConditionType(String value) {
+        WhereType(String value) {
             this.value = value;
         }
 
