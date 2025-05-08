@@ -72,13 +72,14 @@ public class Select extends Sentence {
             for (int i = 0; i < declaredConstructor.getParameters().length; i++) {
                 Parameter parameter = declaredConstructor.getParameters()[i];
 
-                if (parameter.getAnnotation(Param.class) == null)
+                Param param;
+                if ((param = parameter.getAnnotation(Param.class)) == null)
                     continue;
 
                 if (!hasParam)
                     hasParam= true;
 
-                this.parameters.put(parameter.getName(), i);
+                this.parameters.put(param.value(), i);
             }
 
             if (!hasParam) {
