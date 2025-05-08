@@ -26,6 +26,7 @@ public abstract class SqlFactory {
         SentenceManager.registerMerge(Insert.class, SqlFactory.class, MysqlMerge::insert);
         SentenceManager.registerMerge(Update.class, SqlFactory.class, MysqlMerge::update);
         SentenceManager.registerMerge(Select.class, SqlFactory.class, MysqlMerge::select);
+        SentenceManager.registerMerge(Delete.class, SqlFactory.class, MysqlMerge::delete);
     }
 
     public SqlFactory(int maxPoolSize) {

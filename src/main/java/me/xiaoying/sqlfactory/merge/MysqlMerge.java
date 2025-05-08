@@ -214,4 +214,36 @@ public class MysqlMerge {
 
         return stringBuilder.toString();
     }
+
+    public static String delete(Delete delete) {
+        // wheres
+        StringBuilder whereBuilder = new StringBuilder();
+        for (int i = 0; i < delete.getWheres().size(); i++) {
+            Where where = delete.getWheres().get(i);
+
+            if (i != 0)
+                whereBuilder.append(" ").append(where.getConnectionType()).append(" ");
+
+            whereBuilder.append(where.merge());
+        }
+
+        // tables
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < delete.getTables().length; i++) {
+            stringBuilder.append("DELETE FROM ").append(delete.getTables()[i]);
+
+            if (!delete.getWheres().isEmpty())
+                stringBuilder.append(" WHERE ").append(whereBuilder);
+
+            stringBuilder.append(";");
+
+            if (i == delete.getTables().length - 1)
+                break;
+
+            stringBuilder.append("\n");
+        }
+
+        return stringBuilder.toString();
+    }
 }
