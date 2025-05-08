@@ -138,15 +138,15 @@ public class MysqlMerge {
             setsBuilder.append(", ");
         }
 
-        // conditions
-        StringBuilder conditionBuilder = new StringBuilder();
-        for (int i = 0; i < update.getConditions().size(); i++) {
-            Condition condition = update.getConditions().get(i);
+        // wheres
+        StringBuilder whereBuilder = new StringBuilder();
+        for (int i = 0; i < update.getWheres().size(); i++) {
+            Where where = update.getWheres().get(i);
 
             if (i != 0)
-                conditionBuilder.append(" ").append(condition.getConnectionType()).append(" ");
+                whereBuilder.append(" ").append(where.getConnectionType()).append(" ");
 
-            conditionBuilder.append(condition.merge());
+            whereBuilder.append(where.merge());
         }
 
         for (int i = 0; i < update.getTables().length; i++) {
@@ -154,8 +154,8 @@ public class MysqlMerge {
 
             stringBuilder.append(setsBuilder);
 
-            if (conditionBuilder.length() != 0)
-                stringBuilder.append(" WHERE ").append(conditionBuilder);
+            if (whereBuilder.length() != 0)
+                stringBuilder.append(" WHERE ").append(whereBuilder);
 
             stringBuilder.append(";");
 
@@ -186,23 +186,23 @@ public class MysqlMerge {
             columnBuilder.append(name);
         }
 
-        // conditions
-        StringBuilder conditionBuilder = new StringBuilder();
-        for (int i = 0; i < select.getConditions().size(); i++) {
-            Condition condition = select.getConditions().get(i);
+        // wheres
+        StringBuilder whereBuilder = new StringBuilder();
+        for (int i = 0; i < select.getWheres().size(); i++) {
+            Where where = select.getWheres().get(i);
 
             if (i != 0)
-                conditionBuilder.append(" ").append(condition.getConnectionType()).append(" ");
+                whereBuilder.append(" ").append(where.getConnectionType()).append(" ");
 
-            conditionBuilder.append(condition.merge());
+            whereBuilder.append(where.merge());
         }
 
         // tables
         for (int i = 0; i < select.getTables().length; i++) {
             stringBuilder.append("SELECT ").append(columnBuilder).append(" FROM ").append(select.getTables()[i]);
 
-            if (conditionBuilder.length() != 0)
-                stringBuilder.append(" WHERE ").append(conditionBuilder);
+            if (whereBuilder.length() != 0)
+                stringBuilder.append(" WHERE ").append(whereBuilder);
 
             stringBuilder.append(";");
 

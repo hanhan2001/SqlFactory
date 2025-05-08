@@ -18,7 +18,7 @@ public class Select extends Sentence {
     private final String[] tables;
 
     private final Class<?> clazz;
-    private final List<Condition> conditions = new ArrayList<>();
+    private final List<Where> wheres = new ArrayList<>();
 
     private Constructor<?> constructor;
     private final Map<String, Integer> parameters = new HashMap<>();
@@ -43,7 +43,7 @@ public class Select extends Sentence {
 
             declaredField.setAccessible(true);
             try {
-                this.conditions.add(new Condition(declaredField.getName(), declaredField.get(object)));
+                this.wheres.add(new Where(declaredField.getName(), declaredField.get(object)));
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -90,6 +90,19 @@ public class Select extends Sentence {
             declaredConstructor.setAccessible(true);
             this.constructor = declaredConstructor;
         }
+    }
+
+    public Select where(String key, Object value) {
+        return this.where(key, value, (Where.ConditionType) null);
+    }
+
+    public Select where(String key, Object value, Where.ConditionType... types) {
+        return this.where(new Where(key, value, types));
+    }
+
+    public Select where(Where condition) {
+        this.wheres.add(condition);
+        return this;
     }
 
     @Override

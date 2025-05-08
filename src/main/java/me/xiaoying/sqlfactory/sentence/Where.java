@@ -8,7 +8,7 @@ import me.xiaoying.sqlfactory.entity.Column;
 import java.lang.reflect.Array;
 import java.util.*;
 
-public class Condition {
+public class Where {
     private final Object key;
     private final Object value;
     private final ConditionType[] types;
@@ -18,9 +18,9 @@ public class Condition {
     @Accessors(chain = true)
     private ConditionType connectionType = ConditionType.AND;
 
-    private final List<Condition> conditions = new ArrayList<>();
+    private final List<Where> conditions = new ArrayList<>();
 
-    public Condition(Object key, Object value, ConditionType... types) {
+    public Where(Object key, Object value, ConditionType... types) {
         if (key instanceof String)
             this.key = Column.formatName((String) key);
         else
@@ -31,11 +31,11 @@ public class Condition {
         this.types = types == null || types.length == 0 || types[0] == null ? new ConditionType[] { ConditionType.EQUAL } : types;
     }
 
-    public Condition condition(String key, Object value, ConditionType... types) {
-        return this.condition(new Condition(key, value, types));
+    public Where condition(String key, Object value, ConditionType... types) {
+        return this.condition(new Where(key, value, types));
     }
 
-    public Condition condition(Condition condition) {
+    public Where condition(Where condition) {
         this.conditions.add(condition);
         return this;
     }

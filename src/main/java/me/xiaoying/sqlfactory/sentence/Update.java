@@ -15,7 +15,7 @@ public class Update extends Sentence {
     private final String[] tables;
 
     private final Map<Integer, Map<String, Object>> values = new HashMap<>();
-    private final List<Condition> conditions = new ArrayList<>();
+    private final List<Where> wheres = new ArrayList<>();
 
     public Update(Object object) {
         this(object, null);
@@ -46,16 +46,16 @@ public class Update extends Sentence {
         }
     }
 
-    public Update condition(String key, Object value) {
-        return this.condition(key, value, (Condition.ConditionType) null);
+    public Update where(String key, Object value) {
+        return this.where(key, value, (Where.ConditionType) null);
     }
 
-    public Update condition(String key, Object value, Condition.ConditionType... types) {
-        return this.condition(new Condition(key, value, types));
+    public Update where(String key, Object value, Where.ConditionType... types) {
+        return this.where(new Where(key, value, types));
     }
 
-    public Update condition(Condition condition) {
-        this.conditions.add(condition);
+    public Update where(Where condition) {
+        this.wheres.add(condition);
         return this;
     }
 
