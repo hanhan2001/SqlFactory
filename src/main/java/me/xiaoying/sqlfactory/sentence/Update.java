@@ -34,15 +34,15 @@ public class Update extends Sentence {
 
         for (Field declaredField : object.getClass().getDeclaredFields()) {
             try {
+                if (declaredField.getAnnotation(Column.class) == null)
+                    continue;
+
                 declaredField.setAccessible(true);
 
                 if (declaredField.getAnnotation(AutoCondition.class) != null || Modifier.isFinal(declaredField.getModifiers())) {
                     this.where(declaredField.getName(), declaredField.get(object));
                     continue;
                 }
-
-                if (declaredField.getAnnotation(Column.class) == null)
-                    continue;
 
                 Map<String, Object> map = new HashMap<>();
 
