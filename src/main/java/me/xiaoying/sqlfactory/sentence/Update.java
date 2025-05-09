@@ -46,10 +46,6 @@ public class Update extends Sentence {
 
                 Map<String, Object> map = new HashMap<>();
 
-//                Object value = declaredField.get(object);
-//                if (value instanceof String && ((String) value).contains("\""))
-//                    value = ((String) value).replace("\"", "\\\"");
-
                 map.put(declaredField.getName(), declaredField.get(object));
                 this.values.put(this.values.size(), map);
             } catch (IllegalAccessException e) {
