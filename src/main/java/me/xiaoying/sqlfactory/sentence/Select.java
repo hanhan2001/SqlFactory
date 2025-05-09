@@ -77,7 +77,7 @@ public class Select extends Sentence {
                     continue;
 
                 if (!hasParam)
-                    hasParam= true;
+                    hasParam = true;
 
                 this.parameters.put(param.value(), i);
             }
@@ -89,6 +89,7 @@ public class Select extends Sentence {
 
             declaredConstructor.setAccessible(true);
             this.constructor = declaredConstructor;
+            break;
         }
     }
 
