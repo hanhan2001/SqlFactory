@@ -91,7 +91,6 @@ public abstract class SqlFactory {
 
         for (Sentence sen : sentence) {
             if (!(sen instanceof Select)) {
-                System.out.println(sen.merge().size());
                 this.run(sen.merge().toArray(new String[0]));
                 continue;
             }
