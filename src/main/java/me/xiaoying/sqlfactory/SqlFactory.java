@@ -91,14 +91,15 @@ public abstract class SqlFactory {
 
         for (Sentence sen : sentence) {
             if (!(sen instanceof Select)) {
-                this.run(sen.toString());
+                System.out.println(sen.merge().size());
+                this.run(sen.merge().toArray(new String[0]));
                 continue;
             }
 
             Select select = (Select) sen;
 
             try {
-                PreparedStatement preparedStatement = this.getConnection().prepareStatement(select.merge());
+                PreparedStatement preparedStatement = this.getConnection().prepareStatement(select.merge().get(0));
                 ResultSet resultSet = preparedStatement.executeQuery();
                 ResultSetMetaData metaData = resultSet.getMetaData();
 

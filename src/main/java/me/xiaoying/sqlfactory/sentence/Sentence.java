@@ -2,6 +2,8 @@ package me.xiaoying.sqlfactory.sentence;
 
 import me.xiaoying.sqlfactory.SqlFactory;
 
+import java.util.List;
+
 public abstract class Sentence {
     protected Class<? extends SqlFactory> factory;
 
@@ -9,10 +11,19 @@ public abstract class Sentence {
         this.factory = factory;
     }
 
-    public abstract String merge();
+    public abstract List<String> merge();
 
     @Override
     public String toString() {
-        return this.merge();
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (String string : this.merge()) {
+            if (stringBuilder.length() != 0)
+                stringBuilder.append("\n");
+
+            stringBuilder.append(string);
+        }
+
+        return stringBuilder.toString();
     }
 }

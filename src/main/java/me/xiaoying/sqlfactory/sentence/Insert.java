@@ -69,7 +69,7 @@ public class Insert extends Sentence {
     }
 
     @Override
-    public String merge() {
+    public List<String> merge() {
         return SentenceManager.getMerge(this, this.factory).merge(this);
     }
 }

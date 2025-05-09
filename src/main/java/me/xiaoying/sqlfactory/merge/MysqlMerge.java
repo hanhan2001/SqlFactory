@@ -1,16 +1,18 @@
 package me.xiaoying.sqlfactory.merge;
 
 import me.xiaoying.sqlfactory.entity.Column;
+import me.xiaoying.sqlfactory.entity.Table;
 import me.xiaoying.sqlfactory.sentence.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MysqlMerge {
-    public static String create(Create create) {
+    public static List<String> create(Create create) {
         // columns
         StringBuilder columnsBuilder = new StringBuilder();
 
@@ -51,29 +53,24 @@ public class MysqlMerge {
             columnsBuilder.append(", ");
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
+        List<String> list = new ArrayList<>();
 
-        for (int i = 0; i < create.getTables().length; i++) {
-            stringBuilder.append("CREATE TABLE IF NOT EXISTS ");
-            stringBuilder.append("`").append(create.getTables()[i].getName()).append("`(").append(columnsBuilder).append(")");
+        for (Table table : create.getTables()) {
+            StringBuilder stringBuilder = new StringBuilder("CREATE TABLE IF NOT EXISTS `").append(table.getName()).append("`(").append(columnsBuilder).append(")");
 
             if (create.getTables().length > 0 && create.getTables()[0].getComment() != null && !create.getTables()[0].getComment().isEmpty())
                 stringBuilder.append(" COMMENT '").append(create.getTables()[0].getComment()).append("'");
 
             stringBuilder.append(";");
-
-            if (i == create.getTables().length - 1)
-                break;
-
-            stringBuilder.append("\n");
+            list.add(stringBuilder.toString());
         }
 
-        return stringBuilder.toString();
+        return list;
     }
 
-    public static String insert(Insert insert) {
+    public static List<String> insert(Insert insert) {
         if (insert.getValues().isEmpty())
-            return "";
+            return Collections.emptyList();
 
         // columns and values
         List<String> suffix = new ArrayList<>();
@@ -110,22 +107,15 @@ public class MysqlMerge {
             valuesBuilder.delete(0, valuesBuilder.length());
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < insert.getTables().length; i++) {
-            for (String s : suffix) {
-                if (stringBuilder.length() != 0)
-                    stringBuilder.append("\n");
+        List<String> list = new ArrayList<>();
+        for (String table : insert.getTables())
+            for (String s : suffix)
+                list.add("INSERT INTO `" + table + "`" + s);
 
-                stringBuilder.append("INSERT INTO `").append(insert.getTables()[i]).append("`").append(s);
-            }
-        }
-
-        return stringBuilder.toString();
+        return list;
     }
 
-    public static String update(Update update) {
-        StringBuilder stringBuilder = new StringBuilder();
-
+    public static List<String> update(Update update) {
         // sets
         StringBuilder setsBuilder = new StringBuilder();
         for (int i = 0; i < update.getValues().size(); i++) {
@@ -149,8 +139,9 @@ public class MysqlMerge {
             whereBuilder.append(where.merge());
         }
 
-        for (int i = 0; i < update.getTables().length; i++) {
-            stringBuilder.append("UPDATE ").append(update.getTables()[i]).append(" SET ");
+        List<String> list = new ArrayList<>();
+        for (String table : update.getTables()) {
+            StringBuilder stringBuilder = new StringBuilder("UPDATE ").append(table).append(" SET ");
 
             stringBuilder.append(setsBuilder);
 
@@ -158,19 +149,13 @@ public class MysqlMerge {
                 stringBuilder.append(" WHERE ").append(whereBuilder);
 
             stringBuilder.append(";");
-
-            if (i == update.getTables().length - 1)
-                break;
-
-            stringBuilder.append("\n");
+            list.add(stringBuilder.toString());
         }
 
-        return stringBuilder.toString();
+        return list;
     }
 
-    public static String select(Select select) {
-        StringBuilder stringBuilder = new StringBuilder();
-
+    public static List<String> select(Select select) {
         // columns
         StringBuilder columnBuilder = new StringBuilder();
         Field[] declaredFields = select.getClazz().getDeclaredFields();
@@ -197,25 +182,22 @@ public class MysqlMerge {
             whereBuilder.append(where.merge());
         }
 
+        List<String> list = new ArrayList<>();
         // tables
-        for (int i = 0; i < select.getTables().length; i++) {
-            stringBuilder.append("SELECT ").append(columnBuilder).append(" FROM ").append(select.getTables()[i]);
+        for (String table : select.getTables()) {
+            StringBuilder stringBuilder = new StringBuilder("SELECT ").append(columnBuilder).append(" FROM ").append(table);
 
             if (whereBuilder.length() != 0)
                 stringBuilder.append(" WHERE ").append(whereBuilder);
 
             stringBuilder.append(";");
-
-            if (i == select.getTables().length - 1)
-                break;
-
-            stringBuilder.append("\n");
+            list.add(stringBuilder.toString());
         }
 
-        return stringBuilder.toString();
+        return list;
     }
 
-    public static String delete(Delete delete) {
+    public static List<String> delete(Delete delete) {
         // wheres
         StringBuilder whereBuilder = new StringBuilder();
         for (int i = 0; i < delete.getWheres().size(); i++) {
@@ -227,23 +209,18 @@ public class MysqlMerge {
             whereBuilder.append(where.merge());
         }
 
+        List<String> list = new ArrayList<>();
         // tables
-        StringBuilder stringBuilder = new StringBuilder();
-
         for (int i = 0; i < delete.getTables().length; i++) {
-            stringBuilder.append("DELETE FROM ").append(delete.getTables()[i]);
+            StringBuilder stringBuilder = new StringBuilder("DELETE FROM ").append(delete.getTables()[i]);
 
             if (!delete.getWheres().isEmpty())
                 stringBuilder.append(" WHERE ").append(whereBuilder);
 
             stringBuilder.append(";");
-
-            if (i == delete.getTables().length - 1)
-                break;
-
-            stringBuilder.append("\n");
+            list.add(stringBuilder.toString());
         }
 
-        return stringBuilder.toString();
+        return list;
     }
 }

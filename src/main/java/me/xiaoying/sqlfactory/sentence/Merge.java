@@ -1,5 +1,7 @@
 package me.xiaoying.sqlfactory.sentence;
 
+import java.util.List;
+
 public interface Merge<T extends Sentence> {
-    String merge(T sentence);
+    List<String> merge(T sentence);
 }
