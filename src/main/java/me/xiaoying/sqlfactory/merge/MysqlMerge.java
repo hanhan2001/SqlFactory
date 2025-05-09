@@ -43,7 +43,7 @@ public class MysqlMerge {
                 columnsBuilder.append(" PRIMARY KEY");
 
             if (column.getComment() != null && !column.getComment().isEmpty())
-                columnsBuilder.append(" COMMENT \"").append(column.getComment()).append("\"");
+                columnsBuilder.append(" COMMENT '").append(column.getComment()).append("'");
 
             if (i == create.getColumns().length - 1)
                 break;
@@ -58,7 +58,7 @@ public class MysqlMerge {
             stringBuilder.append("`").append(create.getTables()[i].getName()).append("`(").append(columnsBuilder).append(")");
 
             if (create.getTables().length > 0 && create.getTables()[0].getComment() != null && !create.getTables()[0].getComment().isEmpty())
-                stringBuilder.append(" COMMENT \"").append(create.getTables()[0].getComment()).append("\"");
+                stringBuilder.append(" COMMENT '").append(create.getTables()[0].getComment()).append("'");
 
             stringBuilder.append(";");
 
@@ -90,7 +90,7 @@ public class MysqlMerge {
             AtomicInteger index = new AtomicInteger(0);
             stringObjectMap.forEach((column, value) -> {
                 columnBuilder.append(Column.formatName(column));
-                valuesBuilder.append("\"").append(value).append("\"");
+                valuesBuilder.append("'").append(value).append("'");
 
                 if (index.get() == stringObjectMap.size() - 1)
                     return;
@@ -130,7 +130,7 @@ public class MysqlMerge {
         StringBuilder setsBuilder = new StringBuilder();
         for (int i = 0; i < update.getValues().size(); i++) {
             for (String string : update.getValues().get(i).keySet())
-                setsBuilder.append(Column.formatName(string)).append(" = \"").append(update.getValues().get(i).get(string)).append("\"");
+                setsBuilder.append(Column.formatName(string)).append(" = '").append(update.getValues().get(i).get(string)).append("'");
 
             if (i == update.getValues().size() - 1)
                 break;
