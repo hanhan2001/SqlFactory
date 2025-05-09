@@ -38,26 +38,26 @@ public class Insert extends Sentence {
         list.add(object);
         list.addAll(Arrays.asList(objects));
 
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i) == null)
+        for (Object o : list) {
+            if (o == null)
                 continue;
 
             Table table;
-            if ((table = list.get(i).getClass().getAnnotation(Table.class)) == null)
+            if ((table = o.getClass().getAnnotation(Table.class)) == null)
                 continue;
 
             this.tables = table.name();
 
             Map<String, Object> map = new HashMap<>();
 
-            for (Field declaredField : list.get(i).getClass().getDeclaredFields()) {
+            for (Field declaredField : o.getClass().getDeclaredFields()) {
                 declaredField.setAccessible(true);
 
                 if (declaredField.getAnnotation(Column.class) == null)
                     continue;
 
                 try {
-                    map.put(declaredField.getName(), declaredField.get(list.get(i)));
+                    map.put(declaredField.getName(), declaredField.get(o));
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
