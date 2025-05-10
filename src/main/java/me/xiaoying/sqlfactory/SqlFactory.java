@@ -98,53 +98,55 @@ public abstract class SqlFactory {
             Select select = (Select) sen;
 
             try {
-                PreparedStatement preparedStatement = this.getConnection().prepareStatement(select.merge().get(0));
-                ResultSet resultSet = preparedStatement.executeQuery();
-                ResultSetMetaData metaData = resultSet.getMetaData();
+                for (String string : select.merge()) {
+                    PreparedStatement preparedStatement = this.getConnection().prepareStatement(string);
+                    ResultSet resultSet = preparedStatement.executeQuery();
+                    ResultSetMetaData metaData = resultSet.getMetaData();
 
-                while (resultSet.next()) {
-                    Object[] parameters = new Object[select.getParameters().size()];
-                    Map<String, Object> fields = new HashMap<>();
+                    while (resultSet.next()) {
+                        Object[] parameters = new Object[select.getParameters().size()];
+                        Map<String, Object> fields = new HashMap<>();
 
-                    for (int i = 0; i < metaData.getColumnCount(); i++) {
-                        String columnName = metaData.getColumnName(i + 1);
+                        for (int i = 0; i < metaData.getColumnCount(); i++) {
+                            String columnName = metaData.getColumnName(i + 1);
 
-                        if (select.getParameters().containsKey(columnName)) {
-                            parameters[i] = resultSet.getObject(columnName);
-                            continue;
+                            if (select.getParameters().containsKey(columnName)) {
+                                parameters[select.getParameters().get(columnName)] = resultSet.getObject(columnName);
+                                continue;
+                            }
+
+                            if (select.getConstructor() != null) {
+                                if (select.getConstructor().getParameters()[i].getType().isPrimitive())
+                                    parameters[select.getParameters().get(columnName)] = 0;
+                                else
+                                    parameters[select.getParameters().get(columnName)] = null;
+                            }
+
+                            fields.put(columnName, resultSet.getObject(columnName));
                         }
 
-                        if (select.getConstructor() != null) {
-                            if (select.getConstructor().getParameters()[i].getType().isPrimitive())
-                                parameters[i] = 0;
-                            else
-                                parameters[i] = null;
+                        Object object;
+
+                        if (select.getConstructor() == null)
+                            object = select.getClazz().newInstance();
+                        else
+                            object = select.getConstructor().newInstance(parameters);
+
+                        for (Field declaredField : select.getClazz().getDeclaredFields()) {
+                            if (declaredField.getAnnotation(Column.class) == null)
+                                continue;
+
+                            if (select.getParameters().containsKey(declaredField.getName()))
+                                continue;
+
+                            declaredField.setAccessible(true);
+                            declaredField.set(object, fields.get(declaredField.getName()));
                         }
 
-                        fields.put(columnName, resultSet.getObject(columnName));
+                        objects.add(object);
                     }
-
-                    Object object;
-
-                    if (select.getConstructor() == null)
-                        object = select.getClazz().newInstance();
-                    else
-                        object = select.getConstructor().newInstance(parameters);
-
-                    for (Field declaredField : select.getClazz().getDeclaredFields()) {
-                        if (declaredField.getAnnotation(Column.class) == null)
-                            continue;
-
-                        if (select.getParameters().containsKey(declaredField.getName()))
-                            continue;
-
-                        declaredField.setAccessible(true);
-                        declaredField.set(object, fields.get(declaredField.getName()));
-                    }
-
-                    objects.add(object);
                 }
-            } catch (SQLException | InstantiationException | IllegalAccessException | InvocationTargetException e){
+            } catch (SQLException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
         }
