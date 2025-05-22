@@ -62,20 +62,20 @@ src\main\java\me\xiaoying\sqlfactory/.
 
 > 我没有将 SqlFactory 上传到 Maven 仓库，并且没有搭建个人的仓库，所以需要手动将 SqlFactory 导入本地仓库
 
-1. 安装到本地仓库
+### 安装到本地仓库
 
-   maven
+maven
 
-   ```
-   mvn install:install-file -DgroupId=me.xiaoying -Dartifact=sqlfactory -Dversion={下载版本} -Dpackaging=jar -Dfile={下载 jar 路径}
-   ```
-   gradle
-   
-   ```
-   ./gradlew publishToMavenLocal
-   ```
+```
+mvn install:install-file -DgroupId=me.xiaoying -Dartifact=sqlfactory -Dversion={下载版本} -Dpackaging=jar -Dfile={下载 jar 路径}
+```
+gradle
 
-需要注意的是使用 gradle 需要先编译出 jar 包才会导入到本地仓库。如果你没有安装 SqlFactory 使用的 gradle warrper 版本(8.9)，则会先下载 gradle，并且会下载 SqlFactory 使用的所有依赖
+```
+./gradlew publishToMavenLocal
+```
+
+需要注意的是使用 gradle 需要先编译出 jar 包才会导入到本地仓库。如果你没有安装 SqlFactory 使用的 gradle wrapper 版本(8.9)，则会先下载 gradle(也可以自行修改使用版本)，并且会下载 SqlFactory 使用的所有依赖
 
 ### 项目中引用
 
