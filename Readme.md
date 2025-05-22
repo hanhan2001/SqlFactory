@@ -1,356 +1,86 @@
 # SqlFactory
 
-> I haven't learnd apache or MyBatis, so I make this project.
+> 在这之前我已经了解过 Mybatis 一类的数据库操作工具，但我觉得将 sql 配置写在 resources 中不太高档并且如果要修改太过麻烦，所以我自己写了 SqlFactory
+
+环境: `Java- 8`
+
+默认依赖版本:
+
+- `Mysql` -> com.mysql:mysql-connector-j -> 9.2.0
+- `Sqlite` -> org.xerial:sqlite-jdbc -> 3.49.1.0
+- `Postgresql` -> org.postgresql -> 42.7.5
+
+
+
+## 功能特性
+
+- 自动拼接 Sql 语句
+- 数据库连接池
+- 高自定义
+- 简单快捷
+- 快速启动
+
+
+
+## 🤚默认支持
+
+> SqlFactory 已经提供了部分数据库和 sql 语句的处理代码
 >
-> SqlFactory can use in sql database, for example: mysql, sqlite, access.
+> 部分常用的 sql 语句会在未来进行添加
+
+#### 数据库
+
+- Mysql
+- Sqlite
+- PostgreSql
+
+#### SQL 语句
+
+- Insert
+- Delete
+- Update
+- Select
+- Create
 
 
 
-移除代码已经实现，缺少 Sqlite 和 PostgreSql 的语句拼接以及 SELECT 语句的类型强转。
+## ⚙️配置依赖
 
-有时间将重写 Readmd.md
+> 我没有将 SqlFactory 上传到 Maven 仓库，并且没有搭建个人的仓库，所以需要手动将 SqlFactory 导入本地仓库
 
+1. 安装到本地仓库
 
+   maven
 
-## Use
+   ```
+   mvn install:install-file -DgroupId=me.xiaoying -Dartifact=sqlfactory -Dversion={下载版本} -Dpackaging=jar -Dfile={下载 jar 路径}
+   ```
+   gradle
+   
+   ```
+   ./gradlew publishToMavenLocal
+   ```
 
-If you want use SqlFactory, you need download jar in releases or build this repository.
+需要注意的是使用 gradle 需要先编译出 jar 包才会导入到本地仓库。如果你没有安装 SqlFactory 使用的 gradle warrper 版本(8.9)，则会先下载 gradle，并且会下载 SqlFactory 使用的所有依赖
 
-1. Use command of maven: `maven install:install-file -DgroupId=me.xiaoying -DartifactId=SqlFactory -Dversion=0.0.2 -Dpackaging=jar -Dfile=SqlFactory-V0.0.2.jar`
-2. Import SqlFactory in `pom.xml`
+### 项目中引用
+
+#### Maven
 
 ```xml
 <dependency>
     <groupId>me.xiaoying</groupId>
-    <artifactId>SqlFactory</artifactId>
-    <version>0.0.2</version>
+    <artifactId>sqlfactory</artifactId>
+    <version>{$version}</version>
 </dependency>
 ```
 
-If your build tool is Gradle, you can set `mavenLocal()` in `build.gradle`.
+#### Gradle
 
-Actually, I still can't use SqlFactory, event though I do it, so you need import SqlFactory to your project directory.
-
-
-
-## Sentence
-
-> I just make some sentence for sql, maybe I make more sentence in the future.
-
-| Name   | Description        |
-| ------ | ------------------ |
-| Create | Create table.      |
-| Insert | Insert new record. |
-| Delete | Delete record.     |
-| Update | Update record.     |
-| Select | Select records.    |
-| Drop   | Delete table.      |
-
-
-
-### Create
-
-> Can't use condition
-
-```java
-List<Column> list = new ArrayList();
-// new Column("column's name", "column's type", column's size);
-list.add(new Column("name", "varchar", 255));
-list.add(new Column("age", "int", 3));
-
-Create create = new Create(list, "table's name", "multi tables");
-
-SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
-sqlFactory.run(create);
-```
-
-### Insert
-
-> Can't use condition
-
-```java
-/**
- * ╭─────────────────╮
- * │ name      │ age │
- * ├─────────────────┤
- * │ ZhangMing │ 99  │
- * ╰─────────────────╯
- */
-
-Insert insert = new Insert("table's name", "multi tables");
-insert.insert("XiaoYing", 20);
-insert.insert("XiaoTan", 3);
-
-SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
-sqlFactory.run(insert);
-/**
- * ╭─────────────────╮
- * │ name      │ age │
- * ├─────────────────┤
- * │ ZhangMing │ 99  │
- * │ XiaoYing  │ 20  │
- * │ XiaoTan   │ 3   │
- * ╰─────────────────╯
- */
+```kotlin
+implementation("me.xiaoying:sqlfactory:$version")
 ```
 
 
 
-### Delete
-
-```java
-/**
- * ╭─────────────────╮
- * │ name      │ age │
- * ├─────────────────┤
- * │ ZhangMing │ 99  │
- * │ XiaoYing  │ 20  │
- * │ XiaoTan   │ 3   │
- * ╰─────────────────╯
- */
-Delete delete = new Delete("table's name", "multi tables");
-delete.condition(new Condition("name", "ZhangMing", Condition.Type.EQUAL));
-
-SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
-sqlFactory.run(delete);
-/**
- * ╭─────────────────╮
- * │ name      │ age │
- * ├─────────────────┤
- * │ XiaoYing  │ 20  │
- * │ XiaoTan   │ 3   │
- * ╰─────────────────╯
- */
-```
-
-
-
-### Update
-
-```java
-/**
- * ╭─────────────────╮
- * │ name      │ age │
- * ├─────────────────┤
- * │ ZhangMing │ 99  │
- * │ XiaoYing  │ 20  │
- * │ XiaoTan   │ 3   │
- * ╰─────────────────╯
- */
-Update update = new Update("table's name", "multi tables");
-update.set("age", 0);
-update.condition(new Condition("name", "ZhangMing", Condition.Type.EQUAL));
-
-SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
-sqlFactory.run(delete);
-/**
- * ╭─────────────────╮
- * │ name      │ age │
- * ├─────────────────┤
- * │ ZhangMing │ 0   │
- * │ XiaoYing  │ 20  │
- * │ XiaoTan   │ 3   │
- * ╰─────────────────╯
- */
-```
-
-
-
-### Select
-
-```java
-/**
- * ╭─────────────────╮
- * │ name      │ age │
- * ├─────────────────┤
- * │ ZhangMing │ 99  │
- * │ XiaoYing  │ 20  │
- * │ XiaoTan   │ 3   │
- * ╰─────────────────╯
- */
-List<String> list = new ArrayList();
-list.add("name");
-list.add("age");
-Select select = new Select(list, "table's name", "multi tables");
-
-SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
-List<Table> tables = sqlFactory.run(select);
-/**
- * ╭─────────────────╮
- * │ name      │ age │
- * ├─────────────────┤
- * │ ZhangMing │ 99  │
- * │ XiaoYing  │ 20  │
- * │ XiaoTan   │ 3   │
- * ╰─────────────────╯
- */
-```
-
-
-
-### Drop
-
-```java
-Drop drop = new Drop("table's name", "multi tables");
-System.out.println(drop);
-// It will print "DROP TABLE `table's name`, `multi tables`" in console
-
-SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
-sqlFactory.run(drop);
-```
-
-
-
-
-
-## Condition
-
-> I don't know how to explaint it, I tried make some code to do example
-
-Condition(Obejct, Object, Condition.Type)
-
-
-
-### Type
-
-| Name          | Description       |
-| ------------- | ----------------- |
-| EQUAL         | ==                |
-| NOT_EQUAL     | <>                |
-| GREATER       | >                 |
-| GREATER_EQUAL | >=                |
-| LESS          | <                 |
-| LESS_EQUAL    | <=                |
-| LIKE          | like              |
-| AND           | and               |
-| OR            | or                |
-| IS_NULL       | null              |
-| NOT_NULL      | not null          |
-| NOT           | not               |
-| IN            | in                |
-| BETWEEN_AND   | between {} and {} |
-
-
-
-### Normal
-
-```java
-// Condition condition = new Condition("field's name", value, Condition.Type);
-
-Condition condition = new Condition("name", "XiaoYing", Condition.Type.EQUAL);
-System.out.println(condition);
-// It will print "`name` = \"XiaoYing\"" in console
-```
-
-
-
-### Multi Condition
-
-> This is complicated method, perhaps you can try create some conditions by yourself to comparsion.
-
-```java
-Condition condition = new Condition("name", "XiaoYing", Condition.Type.EQUAL);
-List<Integer> ageList = new ArrayList();
-ageList.add(18);
-ageList.add(25);
-condition.condition(new Condition("age", ageList, Condition.BETWEEN_AND).setConnectionType(Condition.Type.OR));
-System.out.println(condition);
-// It will print "(`name` = \"Xiaoying\" OR `age` BETWEEN 18 AND 25)" in console
-```
-
-#### Nest
-
-```java
-Condition firstCondition = new Condition("name", "XiaoYing", Condition.Type.EQUAL);
-firstCondition.condition(new Condition("location", "China", Condition.Type.EQUAL));
-System.out.println(firstCondition);
-// It will print "(`name` = \"XiaoYing\" AND `location` = \"China\")" in console
-
-List<Integer> ageList = new ArrayList();
-ageList.add(18);
-ageList.add(25);
-Condition secondCondition = new Condition("age", ageList, Condition.Type.BETWEEN_AND);
-secondCondition.condition("location", "China", Condition.Type.EQUAL);
-// It will print "(`age` BETWEEN 18 AND 25 AND `location` = \"China\")" in console
-
-firstCondition.condition(secondCondition.setConnectionType(ConditionType.OR));
-System.out.println(firstCondition);
-// It will print "(`name` = \"XiaoYing\" AND `location` = \"China\") OR (`age` BETWEEN 18 AND 25 AND `location` = \"China\")" in console
-```
-
-
-
-## Factory
-
-> I made Mysql's and Sqlite's Factory.
->
-> If you want, you can create new class and extend new class to SqlFactory.class
-
-
-
-### Constructor
-
-```java
-// Create MysqlFactory
-SqlFactory mysqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
-
-// Create SqliteFactory
-SqlFactory sqliteFactory = new SqlFactory(new File("C:/Users/Administrator/Desktop/database.db"));
-```
-
-
-
-### Connection Type
-
-> If you use SqlFactory you can set connection type with sql server.
-
-```
-/**
- * Set connection type for sql factory<br>
- * <dl>
- *     <dt>{@code INTERMITTENT}</dt>
- *     <dd>create connection to sql server and stop when sql sentence finish.</dd>
- *     <dt>{@code MAINTAIN}</dt>
- *     <dd>maintain connection to sql server.</dd>
- * </dl>
- *
- * @param type ConnectionType
- */
-public void setConnectionType(ConnectionType type) {
-    this.connectionType = type;
-}
-```
-
-
-
-### Run
-
-#### Single Sentence
-
-```java
-SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
-
-List<String> selectColumns = new ArrayList();
-Select select = new Select(selectColumns, "table", "multi tables");
-
-List<Table> tables = sqlFactory.run(select);
-```
-
-
-
-#### Multi Sentence
-
-```java
-SqlFactory sqlFactory = new MysqlFactory("localhost", 3306, "database", "usernaem", "password");
-
-Update update = new Update("table", "mulit tables");
-update.set("age", 18);
-update.set("location", "China");
-update.condition(new Condition("name", "XiaoYing"));
-
-List<String> selectColumns = new ArrayList();
-Select select = new Select(selectColumns, "table", "multi tables");
-
-// table list just contains select sentence's table
-List<Table> tables = sqlFactory.run(update, select);
-```
+## 📄基础示例
