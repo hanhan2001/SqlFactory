@@ -44,6 +44,20 @@
 
 
 
+## 🌳项目结构
+
+```
+src\main\java\me\xiaoying\sqlfactory/.
+├─annotation #注解，如 @Table, @Column
+├─config #数据库配置类
+├─entity #Table Column 实体
+├─factory #数据库工厂
+├─merge #不同数据库的 sql 语句拼接处理
+└─sentence #sql 语句实体类
+```
+
+
+
 ## ⚙️配置依赖
 
 > 我没有将 SqlFactory 上传到 Maven 仓库，并且没有搭建个人的仓库，所以需要手动将 SqlFactory 导入本地仓库
