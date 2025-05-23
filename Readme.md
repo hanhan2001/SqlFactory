@@ -67,7 +67,7 @@ src\main\java\me\xiaoying\sqlfactory/.
 maven
 
 ```
-mvn install:install-file -DgroupId=me.xiaoying -Dartifact=sqlfactory -Dversion={下载版本} -Dpackaging=jar -Dfile={下载 jar 路径}
+mvn install:install-file -DgroupId=me.xiaoying -DartifactId=sqlfactory -Dversion={下载版本} -Dpackaging=jar -Dfile={下载 jar 路径}
 ```
 gradle
 
