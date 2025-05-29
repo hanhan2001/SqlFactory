@@ -97,4 +97,49 @@ implementation("me.xiaoying:sqlfactory:$version")
 
 
 
-## 📄基础示例
+## 🧭基础示例
+
+### 创建表
+
+假设有表结构如下
+
+```
+╭─────────────────╮
+│ name      │ age │
+├─────────────────┤
+│ ZhangMing │ 99  │
+│ XiaoYing  │ 20  │
+│ XiaoTan   │ 3   │
+╰─────────────────╯
+```
+
+对照此表则需要在 Java 中指定 class 如下
+
+```java
+import me.xiaoying.sqlfactory.annotation.Table;
+
+// class 需要指定使用 @Table 注解，否则无法识别成 table 对象
+@Table
+public class MyTable {
+    // 对变量的修饰符没有限制，只要有 @Column 注解则会被识别成列对象
+    @Column(length=255)
+    private String name;
+    
+    // @Column name 可以指定当前变量在表中的名称是什么，在创建表时将使用 @Column 指定的名称设置列名称
+    @Column(length=3, name="age")
+    private int other;
+}
+```
+
+执行创建表
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        SqliteFactory factory = new SqliteFactory(new File("C:/Users/Administrator/Desktop/test.db"));
+        factory.run(new Create(MyTable.class);
+        // 或者使用 factory.run(new Create(new MyTable())) 是一样的
+    }
+}
+```
+
