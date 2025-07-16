@@ -85,18 +85,20 @@ publishing {
     }
 }
 
-tasks.jar {
-    archiveFileName.set("sqlfactory-${project.version}.jar")
-}
+tasks {
+    jar {
+        archiveFileName.set("sqlfactory-${project.version}.jar")
+    }
 
-tasks.shadowJar {
-    archiveFileName.set("sqlfactory-all-${project.version}.jar")
-}
+    shadowJar {
+        archiveFileName.set("sqlfactory-all-${project.version}.jar")
+    }
 
-tasks.named("publishToMavenLocal") {
-    dependsOn("sqlite", "mysql", "postgresql", tasks.jar, tasks.shadowJar)
-}
+    named("publishToMavenLocal") {
+        dependsOn("sqlite", "mysql", "postgresql", jar, shadowJar)
+    }
 
-tasks.build {
-    dependsOn("sqlite", "mysql", "postgresql", tasks.jar, tasks.shadowJar)
+    build {
+        dependsOn("sqlite", "mysql", "postgresql", jar, shadowJar)
+    }
 }
