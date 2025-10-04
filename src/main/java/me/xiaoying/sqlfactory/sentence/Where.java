@@ -18,7 +18,7 @@ public class Where {
     @Accessors(chain = true)
     private WhereType connectionType = WhereType.AND;
 
-    private final List<Where> conditions = new ArrayList<>();
+    private final List<Where> wheres = new ArrayList<>();
 
     public Where(Object key, Object value, WhereType... types) {
         if (key instanceof String)
@@ -31,26 +31,26 @@ public class Where {
         this.types = types == null || types.length == 0 || types[0] == null ? new WhereType[] { WhereType.EQUAL } : types;
     }
 
-    public Where condition(String key, Object value, WhereType... types) {
-        return this.condition(new Where(key, value, types));
+    public Where where(String key, Object value, WhereType... types) {
+        return this.where(new Where(key, value, types));
     }
 
-    public Where condition(Where condition) {
-        this.conditions.add(condition);
+    public Where where(Where condition) {
+        this.wheres.add(condition);
         return this;
     }
 
     public String merge() {
-        if (this.conditions.isEmpty())
+        if (this.wheres.isEmpty())
             return this.handle();
 
         StringBuilder stringBuilder = new StringBuilder("(");
         stringBuilder.append(this.handle()).append(" ");
 
-        for (int i = 0; i < this.conditions.size(); i++) {
-            stringBuilder.append(this.conditions.get(i).getConnectionType()).append(" ").append(this.conditions.get(i).merge());
+        for (int i = 0; i < this.wheres.size(); i++) {
+            stringBuilder.append(this.wheres.get(i).getConnectionType()).append(" ").append(this.wheres.get(i).merge());
 
-            if (i == this.conditions.size() - 1)
+            if (i == this.wheres.size() - 1)
                 break;
 
             stringBuilder.append(" ");
@@ -98,7 +98,7 @@ public class Where {
                     stringBuilder.append(string);
                     break;
                 }
-                case IN:
+                case IN: {
                     if (!this.value.getClass().isArray() && !(this.value instanceof List<?>)) {
                         stringBuilder.append("IN (\"").append(this.value).append("\")");
                         break;
@@ -127,6 +127,12 @@ public class Where {
                     }
 
                     stringBuilder.append(")");
+                    break;
+                }
+                case LIMIT:
+                    try {
+                        stringBuilder.append("LIMIT ").append(Integer.parseInt(this.value.toString()));
+                    } catch (Exception e) {}
                     break;
                 default:
                     stringBuilder.append(this.types[i]);
@@ -167,6 +173,7 @@ public class Where {
         NULL("NULL"),
         IS_NULL("IS NULL"),
         IN("IN"),
+        LIMIT("LIMIT"),
         BETWEEN_AND("BETWEEN {} AND {}");
 
         private final String value;

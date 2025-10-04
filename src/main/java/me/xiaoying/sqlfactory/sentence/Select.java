@@ -3,6 +3,8 @@ package me.xiaoying.sqlfactory.sentence;
 import lombok.Getter;
 import me.xiaoying.sqlfactory.SqlFactory;
 import me.xiaoying.sqlfactory.annotation.*;
+import me.xiaoying.sqlfactory.entity.SParameter;
+import me.xiaoying.sqlfactory.handler.TypeHandlerManager;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -21,7 +23,7 @@ public class Select extends Sentence {
     private final List<Where> wheres = new ArrayList<>();
 
     private Constructor<?> constructor;
-    private final Map<String, Integer> parameters = new HashMap<>();
+    private final Map<String, SParameter> parameters = new HashMap<>();
 
     public Select(Object object) {
         this(object, null);
@@ -42,11 +44,22 @@ public class Select extends Sentence {
                 continue;
 
             declaredField.setAccessible(true);
+
+            Object value;
             try {
-                this.wheres.add(new Where(declaredField.getName(), declaredField.get(object)));
+                value = declaredField.get(object);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
+
+            Conversion conversion;
+            if ((conversion = declaredField.getAnnotation(Conversion.class)) != null) {
+                TypeHandlerManager.Callback target = TypeHandlerManager.getTarget(conversion.bind());
+
+                if (target != null) value = target.call(value);
+            }
+
+            this.wheres.add(new Where(declaredField.getName(), value));
         }
     }
 
@@ -79,7 +92,14 @@ public class Select extends Sentence {
                 if (!hasParam)
                     hasParam = true;
 
-                this.parameters.put(param.value(), i);
+                Conversion conversion;
+                try {
+                    conversion = clazz.getDeclaredField(param.value()).getAnnotation(Conversion.class);
+                } catch (NoSuchFieldException e) {
+                    throw new RuntimeException(e);
+                }
+
+                this.parameters.put(param.value(), new SParameter(i, conversion));
             }
 
             if (!hasParam) {

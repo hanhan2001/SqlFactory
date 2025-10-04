@@ -3,7 +3,9 @@ package me.xiaoying.sqlfactory.sentence;
 import lombok.Getter;
 import me.xiaoying.sqlfactory.SqlFactory;
 import me.xiaoying.sqlfactory.annotation.Column;
+import me.xiaoying.sqlfactory.annotation.Conversion;
 import me.xiaoying.sqlfactory.annotation.Table;
+import me.xiaoying.sqlfactory.handler.TypeHandlerManager;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -56,11 +58,21 @@ public class Insert extends Sentence {
                 if (declaredField.getAnnotation(Column.class) == null)
                     continue;
 
+                Object value;
                 try {
-                    map.put(declaredField.getName(), declaredField.get(o));
+                    value = declaredField.get(o);
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
+
+                Conversion conversion;
+                if ((conversion = declaredField.getAnnotation(Conversion.class)) != null) {
+                    TypeHandlerManager.Callback target = TypeHandlerManager.getTarget(conversion.bind());
+
+                    if (target != null) value = target.call(value);
+                }
+
+                map.put(declaredField.getName(), value);
             }
 
             this.values.put(this.values.size(), map);
