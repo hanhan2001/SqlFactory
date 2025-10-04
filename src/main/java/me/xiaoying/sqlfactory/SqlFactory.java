@@ -1,6 +1,8 @@
 package me.xiaoying.sqlfactory;
 
 import me.xiaoying.sqlfactory.annotation.Column;
+import me.xiaoying.sqlfactory.annotation.Conversion;
+import me.xiaoying.sqlfactory.handler.TypeHandlerManager;
 import me.xiaoying.sqlfactory.merge.MysqlMerge;
 import me.xiaoying.sqlfactory.sentence.*;
 
@@ -110,19 +112,41 @@ public abstract class SqlFactory {
                         for (int i = 0; i < metaData.getColumnCount(); i++) {
                             String columnName = metaData.getColumnName(i + 1);
 
+                            // continue this loop if SELECT lose the column
+                            if (select.getParameters().get(columnName) == null)
+                                continue;
+
                             if (select.getParameters().containsKey(columnName)) {
-                                parameters[select.getParameters().get(columnName)] = resultSet.getObject(columnName);
+                                Conversion conversion;
+                                if ((conversion = select.getParameters().get(columnName).getConversion()) == null) {
+                                    parameters[select.getParameters().get(columnName).getIndex()] = resultSet.getObject(columnName);
+                                    continue;
+                                }
+
+                                parameters[select.getParameters().get(columnName).getIndex()] = TypeHandlerManager.getSource(conversion.bind()).call(resultSet.getObject(columnName));
                                 continue;
                             }
 
                             if (select.getConstructor() != null) {
                                 if (select.getConstructor().getParameters()[i].getType().isPrimitive())
-                                    parameters[select.getParameters().get(columnName)] = 0;
+                                    parameters[select.getParameters().get(columnName).getIndex()] = 0;
                                 else
-                                    parameters[select.getParameters().get(columnName)] = null;
+                                    parameters[select.getParameters().get(columnName).getIndex()] = null;
                             }
 
-                            fields.put(columnName, resultSet.getObject(columnName));
+                            // no conversion
+                            if (!select.getParameters().get(columnName).hasConv()) {
+                                fields.put(columnName, resultSet.getObject(columnName));
+                                continue;
+                            }
+
+                            // conversion
+                            TypeHandlerManager.Callback source = TypeHandlerManager.getSource(select.getParameters().get(columnName).getConversion().bind());
+
+                            if (source == null)
+                                fields.put(columnName, resultSet.getObject(columnName));
+                            else
+                                fields.put(columnName, source.call(resultSet.getObject(columnName)));
                         }
 
                         Object object;
