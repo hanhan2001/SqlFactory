@@ -5,7 +5,9 @@ import lombok.experimental.Accessors;
 import me.xiaoying.sqlfactory.SqlFactory;
 import me.xiaoying.sqlfactory.annotation.AutoCondition;
 import me.xiaoying.sqlfactory.annotation.Column;
+import me.xiaoying.sqlfactory.annotation.Conversion;
 import me.xiaoying.sqlfactory.annotation.Table;
+import me.xiaoying.sqlfactory.handler.TypeHandlerManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -40,13 +42,41 @@ public class Update extends Sentence {
                 declaredField.setAccessible(true);
 
                 if (declaredField.getAnnotation(AutoCondition.class) != null || Modifier.isFinal(declaredField.getModifiers())) {
-                    this.where(declaredField.getName(), declaredField.get(object));
+                    Conversion conversion = declaredField.getAnnotation(Conversion.class);
+
+                    if (conversion == null) {
+                        this.where(declaredField.getName(), declaredField.get(object));
+                        continue;
+                    }
+
+                    TypeHandlerManager.Callback target = TypeHandlerManager.getTarget(conversion.bind());
+
+                    if (target == null) {
+                        this.where(declaredField.getName(), declaredField.get(object));
+                        continue;
+                    }
+
+                    this.where(declaredField.getName(), target.call(declaredField.get(object)));
                     continue;
                 }
 
                 Map<String, Object> map = new HashMap<>();
 
-                map.put(declaredField.getName(), declaredField.get(object));
+                Conversion conversion = declaredField.getAnnotation(Conversion.class);
+
+                if (conversion == null) {
+                    map.put(declaredField.getName(), declaredField.get(object));
+                    continue;
+                }
+
+                TypeHandlerManager.Callback target = TypeHandlerManager.getTarget(conversion.bind());
+
+                if (target == null) {
+                    map.put(declaredField.getName(), declaredField.get(object));
+                    continue;
+                }
+
+                map.put(declaredField.getName(), target.call(declaredField.get(object)));
                 this.values.put(this.values.size(), map);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
