@@ -2,16 +2,19 @@ package me.xiaoying.sqlfactory;
 
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
 public enum ColumnType {
+
     VARCHAR("varchar"),
     LONGTEXT("longtext"),
     INT("int"),
     BIGINT("bigint"),
     FLOAT("float"),
     DOUBLE("double"),
+    DECIMAL("decimal"),
     DATE("date"),
     AUTO("auto");
 
@@ -34,6 +37,8 @@ public enum ColumnType {
             return ColumnType.DOUBLE;
         else if (clazz == Date.class || clazz == java.sql.Timestamp.class)
             return ColumnType.DATE;
+        else if (clazz == BigDecimal.class)
+            return ColumnType.DECIMAL;
 
         return ColumnType.VARCHAR;
     }
