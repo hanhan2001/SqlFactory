@@ -12,6 +12,7 @@ import me.xiaoying.sqlfactory.ColumnType;
 @Accessors(chain = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Column {
+
     private String name;
     private ColumnType type;
     private int length;
