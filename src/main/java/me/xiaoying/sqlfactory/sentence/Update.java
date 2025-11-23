@@ -66,6 +66,7 @@ public class Update extends Sentence {
 
                 if (conversion == null) {
                     map.put(declaredField.getName(), declaredField.get(object));
+                    this.values.put(this.values.size(), map);
                     continue;
                 }
 
