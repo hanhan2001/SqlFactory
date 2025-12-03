@@ -58,6 +58,7 @@ public class Create extends Sentence {
                     .setDefaultValue(annotation.defaultValue())
                     .setNullable(annotation.nullable())
                     .setPrimaryKey(annotation.primaryKey())
+                    .setForeignKey(annotation.foreignKey())
                     .setAutoIncrement(annotation.autoIncrement())
                     .setUnique(annotation.unique()));
         }

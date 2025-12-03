@@ -16,6 +16,7 @@ public enum ColumnType {
     DOUBLE("double"),
     DECIMAL("decimal"),
     DATE("date"),
+    BLOB("blob"),
     AUTO("auto");
 
     private final String value;
@@ -37,6 +38,8 @@ public enum ColumnType {
             return ColumnType.DOUBLE;
         else if (clazz == Date.class || clazz == java.sql.Timestamp.class)
             return ColumnType.DATE;
+        else if (clazz == Byte.class || clazz == Byte[].class || clazz == byte.class || clazz == byte[].class)
+            return ColumnType.BLOB;
         else if (clazz == BigDecimal.class)
             return ColumnType.DECIMAL;
 
