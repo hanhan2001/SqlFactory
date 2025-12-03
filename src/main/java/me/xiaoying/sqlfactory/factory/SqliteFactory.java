@@ -2,6 +2,9 @@ package me.xiaoying.sqlfactory.factory;
 
 import me.xiaoying.sqlfactory.SqlFactory;
 import me.xiaoying.sqlfactory.config.SqliteConfig;
+import me.xiaoying.sqlfactory.merge.SqliteMerge;
+import me.xiaoying.sqlfactory.sentence.Create;
+import me.xiaoying.sqlfactory.sentence.SentenceManager;
 import org.sqlite.JDBC;
 
 import java.sql.Connection;
@@ -9,6 +12,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class SqliteFactory extends SqlFactory {
+
+    static {
+        // 默认注册 Mysql 的 merge
+        SentenceManager.registerMerge(Create.class, SqlFactory.class, SqliteMerge::create);
+    }
+
     private final SqliteConfig config;
     private Connection connection;
 

@@ -14,17 +14,31 @@ public @interface Column {
 
     int length();
 
+    /** 传递参数<br>
+     * 例如 decimal(10, 2)，其中 2 就取自 parameter 中的 0 下标对应的值
+     */
     String[] parameter() default {};
 
+    /** 注释 */
     String comment() default "";
 
+    /** 默认值 */
     String defaultValue() default "";
 
-    boolean nullable() default false;
+    /** 是否允许为空 */
+    boolean nullable() default true;
 
+    /** 主键 */
     boolean primaryKey() default false;
 
+    /**
+     * 外键<br>
+     */
+    ForeignKey foreignKey() default @ForeignKey(name = "", referenceTable = "", referenceColumn = "");
+
+    /** 是否为自增列 */
     boolean autoIncrement() default false;
 
+    /** 唯一 */
     boolean unique() default false;
 }

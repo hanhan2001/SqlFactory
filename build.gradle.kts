@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "me.xiaoying.sqlfactory"
-version = "1.2.1"
+version = "1.3.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -38,12 +38,12 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.49.1.0")
 
     // Mysql
-    "mysql"(group = "com.mysql", name = "mysql-connector-j", version = "9.2.0")
-    implementation("com.mysql:mysql-connector-j:9.2.0")
+    "mysql"(group = "com.mysql", name = "mysql-connector-j", version = "9.5.0")
+    implementation("com.mysql:mysql-connector-j:9.5.0")
 
     // PostgreSql
-    "postgresql"(group = "org.postgresql", name = "postgresql", version = "42.7.5")
-    implementation("org.postgresql:postgresql:42.7.5")
+    "postgresql"(group = "org.postgresql", name = "postgresql", version = "42.7.8")
+    implementation("org.postgresql:postgresql:42.7.8")
 }
 
 // 根据不同依赖注册不同的编译任务

@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.experimental.FieldDefaults;
 import me.xiaoying.sqlfactory.ColumnType;
+import me.xiaoying.sqlfactory.annotation.ForeignKey;
 
 @Getter
 @Setter
@@ -21,6 +22,9 @@ public class Column {
     private String defaultValue = "";
     private boolean nullable;
     private boolean primaryKey;
+
+    private ForeignKey foreignKey;
+
     private boolean unique;
     private boolean autoIncrement;
 
