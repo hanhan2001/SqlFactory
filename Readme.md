@@ -1,14 +1,34 @@
 # SqlFactory
 
+
+
+**放弃维护了，我发现更合适的 orm 工具。**
+
+**最初我认为别人做得到的，我也能做到。因此，我决定创建这个项目，并且花费了一定的时间进行维护。**
+
+**不过经过近期日常工作和比赛当中，我意识到我走错了路子。**
+
+**我想说，或许给我足够的时间，我能一个人从零搭建出一个工具链甚至是一个生态。**
+
+**可一次团队赛，我包揽下所有人的任务，仅取得省二的名额，我才意识到我骨子里的傲慢。**
+
+**人类社会不是靠一个人推动的，想为他人考虑的前提是别人是否允许你替他考虑。**
+
+**专业的事交给专业的人做，给别人留活路就是给自己留退路。**
+
+**我需要重新规划我的人生，项目留档——给愿意专研的人借鉴。**
+
+
+
 > 在这之前我已经了解过 Mybatis 一类的数据库操作工具，但我觉得将 sql 配置写在 resources 中不太高档并且如果要修改太过麻烦，所以我自己写了 SqlFactory
 
 环境: `Java- 8`
 
 默认依赖版本:
 
-- `Mysql` -> com.mysql:mysql-connector-j -> 9.2.0
+- `Mysql` -> com.mysql:mysql-connector-j -> 9.5.0
 - `Sqlite` -> org.xerial:sqlite-jdbc -> 3.49.1.0
-- `Postgresql` -> org.postgresql -> 42.7.5
+- `Postgresql` -> org.postgresql -> 42.7.8
 
 
 
@@ -48,40 +68,31 @@
 
 ```
 src\main\java\me\xiaoying\sqlfactory/.
-├─annotation #注解，如 @Table, @Column
-├─config #数据库配置类
-├─entity #Table Column 实体
-├─factory #数据库工厂
-├─merge #不同数据库的 sql 语句拼接处理
-└─sentence #sql 语句实体类
+├─annotation      #注解，如 @Table, @Column
+├─config          #数据库配置类
+├─entity          #Table Column 实体
+├─factory         #数据库工厂
+├─merge           #不同数据库的 sql 语句拼接处理
+└─sentence        #sql 语句实体类
 ```
 
 
 
 ## ⚙️配置依赖
 
-> 我没有将 SqlFactory 上传到 Maven 仓库，并且没有搭建个人的仓库，所以需要手动将 SqlFactory 导入本地仓库
-
-### 安装到本地仓库
-
-maven
-
-```
-mvn install:install-file -DgroupId=me.xiaoying -DartifactId=sqlfactory -Dversion={下载版本} -Dpackaging=jar -Dfile={下载 jar 路径}
-```
-gradle
-
-```
-./gradlew publishToMavenLocal
-```
-
-需要注意的是使用 gradle 需要先编译出 jar 包才会导入到本地仓库。如果你没有安装 SqlFactory 使用的 gradle wrapper 版本(8.9)，则会先下载 gradle(也可以自行修改使用版本)，并且会下载 SqlFactory 使用的所有依赖
+> 已经上传到 312Hz 仓库，或许在未来会删除
 
 ### 项目中引用
 
 #### Maven
 
 ```xml
+<repository>
+	<id>312hz</id>
+    <name>312Hz Maven</name>
+    <url>https://312hz.github.io/maven-repository</url>
+</repository>
+
 <dependency>
     <groupId>me.xiaoying</groupId>
     <artifactId>sqlfactory</artifactId>
@@ -89,9 +100,11 @@ gradle
 </dependency>
 ```
 
-#### Gradle
+#### Gradle(kts)
 
 ```kotlin
+maven("https://312Hz.github.io/maven-repository")
+
 implementation("me.xiaoying:sqlfactory:$version")
 ```
 
