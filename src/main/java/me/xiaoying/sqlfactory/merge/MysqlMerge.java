@@ -40,9 +40,9 @@ public class MysqlMerge {
                     columnsBuilder.append(", ");
 
                 for (int j = 0; j < column.getParameter().length; j++) {
-                    columnsBuilder.append(column.getParameter()[i]);
+                    columnsBuilder.append(column.getParameter()[j]);
 
-                    if (i == column.getParameter().length - 1)
+                    if (j == column.getParameter().length - 1)
                         break;
 
                     columnsBuilder.append(", ");
