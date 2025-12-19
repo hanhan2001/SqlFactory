@@ -101,7 +101,8 @@ public abstract class SqlFactory {
 
             try {
                 for (String string : select.merge()) {
-                    PreparedStatement preparedStatement = this.getConnection().prepareStatement(string);
+                    Connection connection = this.getConnection();
+                    PreparedStatement preparedStatement = connection.prepareStatement(string);
                     ResultSet resultSet = preparedStatement.executeQuery();
                     ResultSetMetaData metaData = resultSet.getMetaData();
 
@@ -169,6 +170,10 @@ public abstract class SqlFactory {
 
                         objects.add(object);
                     }
+
+                    resultSet.close();
+                    preparedStatement.close();
+                    connection.close();
                 }
             } catch (SQLException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
